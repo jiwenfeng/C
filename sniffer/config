@@ -1,0 +1,3 @@
+sniffer_port=80
+sniffer_type=tcp
+sniffer_file=parse.lua
