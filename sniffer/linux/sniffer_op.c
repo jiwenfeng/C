@@ -101,20 +101,21 @@ _proc_igmp(struct sniffer_base *base, const char *str, int datalen)
 static void 
 _proc_ip(struct sniffer_base *base, const char *str, int datalen)
 {
-	struct ip *ip = (struct ip *)str;
-	switch(ip->ip_p)
+	struct iphdr *ip = (struct iphdr *)str;
+	size_t len = ip->ihl * 4;
+	switch(ip->protocol)
 	{
 		case IPPROTO_TCP:
-			_proc_tcp(base, str + ip->ip_hl * 4, datalen - ip->ip_hl * 4);
+			_proc_tcp(base, str + len, datalen - len);
 			break;
 		case IPPROTO_UDP:
-			_proc_udp(base, str + ip->ip_hl * 4, datalen - ip->ip_hl * 4);
+			_proc_udp(base, str + len, datalen - len);
 			break;
 		case IPPROTO_ICMP:
-			_proc_icmp(base, str + ip->ip_hl * 4, datalen - ip->ip_hl * 4);
+			_proc_icmp(base, str + len, datalen - len);
 			break;
 		case IPPROTO_IGMP:
-			_proc_igmp(base, str + ip->ip_hl * 4, datalen - ip->ip_hl * 4);
+			_proc_igmp(base, str + len, datalen - len);
 			break;
 		default:
 			break;
