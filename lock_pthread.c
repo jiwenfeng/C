@@ -159,9 +159,9 @@ rwlock_unlock(struct pthread_rwlock *lock)
 			return;
 		}
 	}
-	if(lock->status == 0)
+	if(lock->nwrite > 0)
 	{
-		if(lock->nwrite > 0)
+		if(lock->status == 0)
 		{
 			pthread_cond_signal(&lock->write);
 		}
@@ -173,7 +173,6 @@ rwlock_unlock(struct pthread_rwlock *lock)
 			pthread_cond_broadcast(&lock->read);
 		}
 	}
-
 	pthread_mutex_unlock(&lock->mutex);
 }
 
