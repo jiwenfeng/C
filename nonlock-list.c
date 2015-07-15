@@ -1,0 +1,115 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+struct message
+{
+	int val;
+	pthread_t pid;
+	struct message *next;
+};
+
+struct message_queue
+{
+	int lock;
+	int idx;
+	struct message *msg;
+};
+
+struct message_queue *message_queue_init();
+void message_queue_push(struct message_queue *mq);
+void message_queue_destroy(struct message_queue *mq);
+void message_queue_debug(struct message_queue *mq);
+
+#define lock(q) while(__sync_lock_test_and_set(&q->lock, 1)){}
+#define unlock(q) __sync_lock_release(&q->lock)
+
+struct message_queue *
+message_queue_init()
+{
+	struct message_queue *mq = (struct message_queue *)malloc(sizeof(struct message_queue));
+	mq->lock = 0;
+	mq->idx = 0;
+	mq->msg = NULL;
+	return mq;
+}
+
+void
+message_queue_destroy(struct message_queue *mq)
+{
+	while(mq->msg != NULL)
+	{
+		struct message *msg = mq->msg;
+		mq->msg = msg->next;
+		free(msg);
+	}
+	free(mq);
+}
+
+void
+message_queue_push(struct message_queue *mq)
+{
+	struct message *msg = (struct message *)malloc(sizeof(struct message));
+	msg->val = __sync_add_and_fetch(&mq->idx, 1);
+	msg->next = NULL;
+	msg->pid = pthread_self();
+	lock(mq);
+	if(NULL == mq->msg)
+	{
+		mq->msg = msg;
+	}
+	else
+	{
+		struct message *last = mq->msg;
+		while(last->next != NULL)
+		{
+			last = last->next;
+		}
+		last->next = msg;
+	}
+	unlock(mq);
+}
+
+void
+message_queue_debug(struct message_queue *mq)
+{
+	struct message *msg = mq->msg;
+	while(msg != NULL)
+	{
+		printf("%u:%d\n", msg->pid, msg->val);
+		msg = msg->next;
+	}
+}
+
+void *
+push_message(void *arg)
+{
+	struct message_queue *mq = (struct message_queue *)arg;
+	int i = 0;
+	while(i < 10)
+	{
+		message_queue_push(mq);
+		++i;
+	}
+	return NULL;
+}
+
+int
+main()
+{
+	struct message_queue *mq = message_queue_init();
+	pthread_t pid[5];
+	int i = 0;
+	for(; i < 5; ++i)
+	{
+		pthread_create(&pid[i], NULL, push_message, mq);
+	}
+	for(i = 0; i < 5; ++i)
+	{
+		pthread_join(pid[i], NULL);
+	}
+	message_queue_debug(mq);
+	message_queue_destroy(mq);
+	return 0;
+}	
