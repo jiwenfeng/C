@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <sys/time.h>
 
 struct message
 {
@@ -17,13 +18,31 @@ struct message_queue
 	struct message *msg;
 };
 
+
 struct message_queue *message_queue_init();
 void message_queue_push(struct message_queue *mq);
 void message_queue_destroy(struct message_queue *mq);
 void message_queue_debug(struct message_queue *mq);
 
+#ifdef __USE_LOCK__
+#define THREAD_NUM 5
 #define lock(q) while(__sync_lock_test_and_set(&q->lock, 1)){}
 #define unlock(q) __sync_lock_release(&q->lock)
+#else
+#define THREAD_NUM 1
+#define lock(q)
+#define unlock(q)
+#endif
+
+#define LOOP_NUM 50000 / THREAD_NUM
+
+int
+getms()
+{
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	return tv.tv_sec * 1000000 + tv.tv_usec;
+}
 
 struct message_queue *
 message_queue_init()
@@ -55,19 +74,12 @@ message_queue_push(struct message_queue *mq)
 	msg->next = NULL;
 	msg->pid = pthread_self();
 	lock(mq);
-	if(NULL == mq->msg)
+	struct message *last;
+	do
 	{
-		mq->msg = msg;
-	}
-	else
-	{
-		struct message *last = mq->msg;
-		while(last->next != NULL)
-		{
-			last = last->next;
-		}
-		last->next = msg;
-	}
+		last = mq->msg;
+		msg->next = last;
+	}while(!__sync_bool_compare_and_swap(&mq->msg, last, msg));
 	unlock(mq);
 }
 
@@ -87,7 +99,7 @@ push_message(void *arg)
 {
 	struct message_queue *mq = (struct message_queue *)arg;
 	int i = 0;
-	while(i < 10)
+	while(i < LOOP_NUM)
 	{
 		message_queue_push(mq);
 		++i;
@@ -99,13 +111,13 @@ int
 main()
 {
 	struct message_queue *mq = message_queue_init();
-	pthread_t pid[5];
+	pthread_t pid[THREAD_NUM];
 	int i = 0;
-	for(; i < 5; ++i)
+	for(i = 0; i < THREAD_NUM; ++i)
 	{
 		pthread_create(&pid[i], NULL, push_message, mq);
 	}
-	for(i = 0; i < 5; ++i)
+	for(i = 0; i < THREAD_NUM; ++i)
 	{
 		pthread_join(pid[i], NULL);
 	}
