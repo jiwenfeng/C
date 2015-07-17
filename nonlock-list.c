@@ -15,7 +15,8 @@ struct message_queue
 {
 	int lock;
 	int idx;
-	struct message *msg;
+	struct message *head;
+	struct message *last;
 };
 
 
@@ -50,17 +51,18 @@ message_queue_init()
 	struct message_queue *mq = (struct message_queue *)malloc(sizeof(struct message_queue));
 	mq->lock = 0;
 	mq->idx = 0;
-	mq->msg = NULL;
+	mq->head = mq->last = NULL;
 	return mq;
 }
 
 void
 message_queue_destroy(struct message_queue *mq)
 {
-	while(mq->msg != NULL)
+	struct message *head = mq->head;
+	while(head != NULL)
 	{
-		struct message *msg = mq->msg;
-		mq->msg = msg->next;
+		struct message *msg = head;
+		head = head->next;
 		free(msg);
 	}
 	free(mq);
@@ -74,19 +76,22 @@ message_queue_push(struct message_queue *mq)
 	msg->next = NULL;
 	msg->pid = pthread_self();
 	lock(mq);
-	struct message *last;
-	do
+	if(mq->head == NULL)
 	{
-		last = mq->msg;
-		msg->next = last;
-	}while(!__sync_bool_compare_and_swap(&mq->msg, last, msg));
+		mq->head = msg;
+	}
+	else
+	{
+		mq->last->next = msg;
+	}
+	mq->last = msg;
 	unlock(mq);
 }
 
 void
 message_queue_debug(struct message_queue *mq)
 {
-	struct message *msg = mq->msg;
+	struct message *msg = mq->head;
 	while(msg != NULL)
 	{
 		printf("%u:%d\n", msg->pid, msg->val);
