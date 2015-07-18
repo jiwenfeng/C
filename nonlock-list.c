@@ -37,14 +37,6 @@ void message_queue_debug(struct message_queue *mq);
 
 #define LOOP_NUM 50000 / THREAD_NUM
 
-int
-getms()
-{
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-	return tv.tv_sec * 1000000 + tv.tv_usec;
-}
-
 struct message_queue *
 message_queue_init()
 {
