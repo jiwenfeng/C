@@ -1,0 +1,7 @@
+port=1588
+proto="TCP"
+src_addr="192.168.23.217"
+dst_addr="192.168.22.57"
+decode="./decode/decode.so"
+keywords="","",""
+#log="./cap.log"
