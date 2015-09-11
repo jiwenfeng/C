@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+struct iphdr;
 struct sniffer_buffer;
 
 #ifndef ulong
@@ -18,6 +19,7 @@ int sniffer_buffer_push(struct sniffer_buffer *sb, ulong sa, ulong da, ushort sp
 char *sniffer_buffer_peek(struct sniffer_buffer *sb, int *sz);
 void sniffer_buffer_remove(struct sniffer_buffer *sb, char *str, int len);
 void sniffer_buffer_destroy(struct sniffer_buffer *sb);
+int sniffer_buffer_delete(struct sniffer_buffer *sb, ulong sa, ulong da, ushort sp, ushort dp);
 
 #undef ulong
 #undef ushort

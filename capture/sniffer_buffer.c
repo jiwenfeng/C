@@ -10,10 +10,10 @@
 
 struct addr
 {
-	ulong saddr;
-	ulong daddr;
-	ushort sport;
-	ushort dport;
+	ulong sa;
+	ulong da;
+	ushort sp;
+	ushort dp;
 };
 
 struct buffer
@@ -47,10 +47,10 @@ buffer_init(ulong sa, ulong da, ushort sp, ushort dp)
 	self->lock = 0;
 	self->cap  = 65535;
 	self->cur  = 0;
-	self->addr.saddr = sa;
-	self->addr.daddr = da;
-	self->addr.sport = sp;
-	self->addr.dport = dp;
+	self->addr.sa = sa;
+	self->addr.da = da;
+	self->addr.sp = sp;
+	self->addr.dp = dp;
 	self->data = (char *)malloc(self->cap);
 	self->next = NULL;
 	self->prev = NULL;
@@ -146,7 +146,7 @@ sniffer_buffer_push(struct sniffer_buffer *self, ulong sa, ulong da, ushort sp, 
 	while(itr != NULL)
 	{
 		struct addr *addr = &itr->addr;
-		if(addr->saddr == sa && addr->daddr == da && addr->sport == sp && addr->dport == dp)
+		if(addr->sa == sa && addr->da == da && addr->sp == sp && addr->dp == dp)
 		{
 			return buffer_push(itr, data, sz);
 		}
@@ -202,7 +202,7 @@ sniffer_buffer_remove(struct sniffer_buffer *self, char *str, int sz)
 	struct buffer *b = self->head;
 	while(b != NULL)
 	{
-		if(b->addr.saddr == addr->saddr && b->addr.daddr == addr->daddr && b->addr.sport == addr->sport && b->addr.dport == addr->dport)
+		if(b->addr.sa == addr->sa && b->addr.da == addr->da && b->addr.sp == addr->sp && b->addr.dp == addr->dp)
 		{
 			buffer_remove(b, sz);
 			free(addr);
@@ -210,4 +210,33 @@ sniffer_buffer_remove(struct sniffer_buffer *self, char *str, int sz)
 		}
 		b = b->next;
 	}
+}
+
+int sniffer_buffer_delete(struct sniffer_buffer *sb, ulong sa, ulong da, ushort sp, ushort dp)
+{
+	struct buffer *b = sb->head;
+	LOCK(sb);
+	while(b)
+	{
+		if(b->addr.sa == sa && b->addr.da == da && b->addr.sp == sp && b->addr.dp == dp)
+		{
+			if(b == sb->head)
+			{
+				sb->head = b->next;
+			}
+			else
+			{
+				b->prev->next = b->next;
+			}
+			if(b->next != NULL)
+			{
+				b->next->prev = b->prev;
+			}
+			buffer_destroy(b);
+			break;
+		}
+		b = b->next;
+	}
+	UNLOCK(sb);
+	return 0;
 }

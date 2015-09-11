@@ -14,7 +14,7 @@ now()
 }
 
 void
-report(void *inst, const char *fmt, ...)
+do_report(void *inst, const char *fmt, ...)
 {
 	FILE *stream = (FILE *)inst;
 	va_list ap;

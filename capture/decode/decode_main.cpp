@@ -20,19 +20,26 @@ using namespace google::protobuf::compiler;
 class decode_inst
 {
 public:
+	decode_inst(const char *path) : _importer(&_tree, NULL)
+	{
+		_tree.MapPath("", path);
+	}
+#if 0
 	decode_inst(const char *path)
 	{
 		tree.MapPath("", path);
 		importer = new Importer(&tree, NULL);
 	}
+#endif
 	~decode_inst()
 	{
-		delete importer;
+//		delete importer;
 	}
 
 	void import_file(const char *file)
 	{
-		importer->Import(file);
+		_importer.Import(file);
+//		importer->Import(file);
 	}
 
 	int decode_msg(const char *str, int sz, char *data, int datalen)
@@ -63,12 +70,14 @@ public:
 private:
 	google::protobuf::Message *create_msg(const char *type_name)
 	{
-		const Descriptor *dsc = importer->pool()->FindMessageTypeByName(type_name);
+//		const Descriptor *dsc = importer->pool()->FindMessageTypeByName(type_name);
+		const Descriptor *dsc = _importer.pool()->FindMessageTypeByName(type_name);
 		if(NULL == dsc)
 		{
 			return NULL;
 		}
-		const google::protobuf::Message *message = factory.GetPrototype(dsc);
+//		const google::protobuf::Message *message = factory.GetPrototype(dsc);
+		const google::protobuf::Message *message = _factory.GetPrototype(dsc);
 		if(NULL == message)
 		{
 			return NULL;
@@ -77,9 +86,9 @@ private:
 	}
 
 private:
-	Importer *importer;
-	DynamicMessageFactory factory;
-	DiskSourceTree tree;
+	Importer _importer;
+	DynamicMessageFactory _factory;
+	DiskSourceTree _tree;
 };
 
 extern "C" void *create()
