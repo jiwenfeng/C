@@ -26,6 +26,7 @@ static int
 proc_tcp_frame(struct sniffer_base *base, const char *str, int n)
 {
 	struct iphdr *ip = (struct iphdr *)str;
+	int ss = ntohs(ip->tot_len);
 	int offset = ip->ihl * 4;
 	struct tcphdr *tcp = (struct tcphdr *)(str + offset);
 	offset += tcp->doff * 4;
@@ -36,16 +37,21 @@ proc_tcp_frame(struct sniffer_base *base, const char *str, int n)
 	{
 		return 0;
 	}
-	if(tcp->rst || tcp->fin)
+	if(tcp->fin)
+	{
+		return sniffer_buffer_delete(base->sb, ip->saddr, ip->daddr, sp, dp);
+	}
+	if(tcp->rst)
 	{
 		sniffer_buffer_delete(base->sb, ip->saddr, ip->daddr, sp, dp);
+		sniffer_buffer_delete(base->sb, ip->daddr, ip->saddr, dp, sp);
 		return 0;
 	}
-	if(ntohs(ip->tot_len) == offset || offset == n)
+	if(ss - offset <= 0)
 	{
 		return 0;
 	}
-	return sniffer_buffer_push(base->sb, ip->saddr, ip->daddr, sp, dp, str + offset, n - offset);
+	return sniffer_buffer_push(base->sb, ip->saddr, ip->daddr, sp, dp, str + offset, ss - offset);
 }
 
 static int
@@ -62,12 +68,6 @@ proc_ip_frame(struct sniffer_base *base, const char *str, int n)
 	{
 		return 0;
 	}
-#if 0
-	if(ntohs(ip->tot_len) - sizeof(struct iphdr) - sizeof(struct tcphdr) == 0)
-	{
-		return 0;
-	}
-#endif
 	struct sniffer_config *cfg = base->cfg;
 	if(ip->saddr != cfg->s_addr && ip->daddr != cfg->s_addr)
 	{

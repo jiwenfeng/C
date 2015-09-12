@@ -8,7 +8,7 @@
 #define LOCK(Q) while(__sync_lock_test_and_set(&Q->lock, 1)) {}
 #define UNLOCK(Q) __sync_lock_release(&Q->lock)
 
-struct addr
+struct session
 {
 	ulong sa;
 	ulong da;
@@ -23,17 +23,17 @@ struct buffer
 	int cur;
 	char *data;
 	struct buffer *next;
-	struct buffer *prev;
-	struct addr addr;
+	struct session *s;
 };
 
 struct sniffer_buffer
 {
 	struct buffer *head;
-	struct buffer *tail;
 	struct buffer *iter;
 	int lock;
 };
+
+#define IS_SAME_SESSION(a1, a2) ((a1)->sa == (a2)->sa && (a1)->da == (a2)->da && (a1)->sp == (a2)->sp && (a1)->dp == (a2)->dp)
 
 static struct buffer *buffer_init(ulong sa, ulong da, ushort sp, ushort dp);
 static void buffer_destroy(struct buffer *b);
@@ -47,13 +47,14 @@ buffer_init(ulong sa, ulong da, ushort sp, ushort dp)
 	self->lock = 0;
 	self->cap  = 65535;
 	self->cur  = 0;
-	self->addr.sa = sa;
-	self->addr.da = da;
-	self->addr.sp = sp;
-	self->addr.dp = dp;
+	struct session *s= (struct session *)malloc(sizeof(struct session));
+	s->sa = sa;
+	s->da = da;
+	s->sp = sp;
+	s->dp = dp;
+	self->s = s;
 	self->data = (char *)malloc(self->cap);
 	self->next = NULL;
-	self->prev = NULL;
 	return self;
 }
 
@@ -61,6 +62,7 @@ void
 buffer_destroy(struct buffer *b)
 {
 	free(b->data);
+	free(b->s);
 	free(b);
 }
 
@@ -102,9 +104,9 @@ buffer_peek(struct buffer *b, int *sz)
 		UNLOCK(b);
 		return NULL;
 	}
-	int len = sizeof(struct addr);
+	int len = sizeof(struct session);
 	char *data = (char *)malloc(b->cur + len);
-	memcpy(data, &b->addr, len);
+	memcpy(data, b->s, len);
 	memcpy(data + len, b->data, b->cur);
 	*sz = b->cur;
 	UNLOCK(b);
@@ -120,7 +122,6 @@ sniffer_buffer_init()
 		return NULL;
 	}
 	self->head = NULL;
-	self->tail = NULL;
 	self->iter = NULL;
 	self->lock = 0;
 	return self;
@@ -142,38 +143,26 @@ sniffer_buffer_destroy(struct sniffer_buffer *self)
 int
 sniffer_buffer_push(struct sniffer_buffer *self, ulong sa, ulong da, ushort sp, ushort dp, const char *data, int sz)
 {
-	struct buffer *itr = self->head;
-	while(itr != NULL)
+	LOCK(self);
+	struct buffer **itr = NULL;
+	for(itr = &self->head; *itr != NULL; itr = &(*itr)->next)
 	{
-		struct addr *addr = &itr->addr;
-		if(addr->sa == sa && addr->da == da && addr->sp == sp && addr->dp == dp)
+		struct session *s = (*itr)->s;
+		if(s->sa == sa && s->da == da && s->sp == sp && s->dp == dp)
 		{
-			return buffer_push(itr, data, sz);
+			UNLOCK(self);
+			return buffer_push(*itr, data, sz);
 		}
-		itr = itr->next;
 	}
-	itr = buffer_init(sa, da, sp, dp);
-	if(NULL == itr)
-	{
-		return 0;
-	}
-	if(NULL == self->head)
-	{
-		self->head = itr;
-		self->tail = itr;
-	}
-	else
-	{
-		itr->prev = self->tail;
-		self->tail->next = itr;
-		self->tail = itr;
-	}
-	return buffer_push(itr, data, sz);
+	*itr = buffer_init(sa, da, sp, dp);
+	UNLOCK(self);
+	return buffer_push(*itr, data, sz);
 }
 
 char *
 sniffer_buffer_peek(struct sniffer_buffer *self, int *sz)
 {
+	LOCK(self);
 	struct buffer *b = self->iter;
 	while(self->head != NULL)
 	{
@@ -185,6 +174,7 @@ sniffer_buffer_peek(struct sniffer_buffer *self, int *sz)
 		self->iter = self->iter->next;
 		if(str != NULL)
 		{
+			UNLOCK(self);
 			return str;
 		}
 		if(self->iter == b)
@@ -192,51 +182,47 @@ sniffer_buffer_peek(struct sniffer_buffer *self, int *sz)
 			break;
 		}
 	}
+	UNLOCK(self);
 	return NULL;
 }
 
 void
 sniffer_buffer_remove(struct sniffer_buffer *self, char *str, int sz)
 {
-	struct addr *addr = (struct addr *)(str - sizeof(struct addr));
+	LOCK(self);
+	struct session *s = (struct session *)(str - sizeof(struct session));
 	struct buffer *b = self->head;
-	while(b != NULL)
-	{
-		if(b->addr.sa == addr->sa && b->addr.da == addr->da && b->addr.sp == addr->sp && b->addr.dp == addr->dp)
-		{
-			buffer_remove(b, sz);
-			free(addr);
-			return ;
-		}
-		b = b->next;
-	}
-}
-
-int sniffer_buffer_delete(struct sniffer_buffer *sb, ulong sa, ulong da, ushort sp, ushort dp)
-{
-	struct buffer *b = sb->head;
-	LOCK(sb);
 	while(b)
 	{
-		if(b->addr.sa == sa && b->addr.da == da && b->addr.sp == sp && b->addr.dp == dp)
+		if(IS_SAME_SESSION(b->s, s))
 		{
-			if(b == sb->head)
-			{
-				sb->head = b->next;
-			}
-			else
-			{
-				b->prev->next = b->next;
-			}
-			if(b->next != NULL)
-			{
-				b->next->prev = b->prev;
-			}
-			buffer_destroy(b);
 			break;
 		}
 		b = b->next;
 	}
-	UNLOCK(sb);
+	if(b)
+	{
+		buffer_remove(b, sz);
+	}
+	free(s);
+	UNLOCK(self);
+}
+
+int sniffer_buffer_delete(struct sniffer_buffer *self, ulong sa, ulong da, ushort sp, ushort dp)
+{
+	LOCK(self);
+	struct buffer **b = NULL;
+	for(b = &self->head; *b != NULL; *b = (*b)->next)
+	{
+		struct session *s = (*b)->s;
+		if(s->sa == sa && s->da == da && s->sp == sp && s->dp == dp)
+		{
+			struct buffer *t = *b;
+			*b = (*b)->next;
+			buffer_destroy(t);
+			break;
+		}
+	}
+	UNLOCK(self);
 	return 0;
 }

@@ -15,11 +15,11 @@ struct sniffer_buffer;
 #endif
 
 struct sniffer_buffer *sniffer_buffer_init();
-int sniffer_buffer_push(struct sniffer_buffer *sb, ulong sa, ulong da, ushort sp, ushort dp, const char *data, int len);
-char *sniffer_buffer_peek(struct sniffer_buffer *sb, int *sz);
-void sniffer_buffer_remove(struct sniffer_buffer *sb, char *str, int len);
-void sniffer_buffer_destroy(struct sniffer_buffer *sb);
-int sniffer_buffer_delete(struct sniffer_buffer *sb, ulong sa, ulong da, ushort sp, ushort dp);
+int sniffer_buffer_push(struct sniffer_buffer *self, ulong sa, ulong da, ushort sp, ushort dp, const char *data, int len);
+char *sniffer_buffer_peek(struct sniffer_buffer *self, int *sz);
+void sniffer_buffer_remove(struct sniffer_buffer *self, char *str, int len);
+void sniffer_buffer_destroy(struct sniffer_buffer *self);
+int sniffer_buffer_delete(struct sniffer_buffer *self, ulong sa, ulong da, ushort sp, ushort dp);
 
 #undef ulong
 #undef ushort
