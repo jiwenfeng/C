@@ -134,8 +134,8 @@ sniffer_buffer_destroy(struct sniffer_buffer *self)
 	while(iter != NULL)
 	{
 		struct buffer *b = iter;
-		buffer_destroy(b);
 		iter = iter->next;
+		buffer_destroy(b);
 	}
 	free(self);
 }

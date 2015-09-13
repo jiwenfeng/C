@@ -24,22 +24,10 @@ public:
 	{
 		_tree.MapPath("", path);
 	}
-#if 0
-	decode_inst(const char *path)
-	{
-		tree.MapPath("", path);
-		importer = new Importer(&tree, NULL);
-	}
-#endif
-	~decode_inst()
-	{
-//		delete importer;
-	}
 
 	void import_file(const char *file)
 	{
 		_importer.Import(file);
-//		importer->Import(file);
 	}
 
 	int decode_msg(const char *str, int sz, char *data, int datalen)
@@ -54,13 +42,15 @@ public:
 		if(NULL == msg)
 		{
 			decode_error("Could Not find Message:%s\n", name);
-			return 0;
+			delete []name;
+			return -1;
 		}
+		delete []name;
 		if(!msg->ParseFromArray(str + offset, sz - offset))
 		{
 			decode_error("Decode TypeName %s Error:%d\n", name, sz - offset);
 			delete msg;
-			return 0;
+			return -1;
 		}
 		snprintf(data, datalen, "%s : {\n%s}", msg->GetTypeName().c_str(), msg->DebugString().c_str());
 		delete msg;
@@ -70,13 +60,11 @@ public:
 private:
 	google::protobuf::Message *create_msg(const char *type_name)
 	{
-//		const Descriptor *dsc = importer->pool()->FindMessageTypeByName(type_name);
 		const Descriptor *dsc = _importer.pool()->FindMessageTypeByName(type_name);
 		if(NULL == dsc)
 		{
 			return NULL;
 		}
-//		const google::protobuf::Message *message = factory.GetPrototype(dsc);
 		const google::protobuf::Message *message = _factory.GetPrototype(dsc);
 		if(NULL == message)
 		{

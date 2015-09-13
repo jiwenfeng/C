@@ -28,24 +28,28 @@ sniffer_module_init(const char *dlpath)
 	void *create = dlsym(handle, "create");
 	if(NULL == create)
 	{
+		dlclose(handle);
 		sniffer_error("%s", dlerror());
 		return NULL;
 	}
 	void *decode = dlsym(handle, "decode");
 	if(NULL == decode)
 	{
+		dlclose(handle);
 		sniffer_error("%s", dlerror());
 		return NULL;
 	}
 	void *destroy = dlsym(handle, "destroy");
 	if(NULL == destroy)
 	{
+		dlclose(handle);
 		sniffer_error("%s", dlerror());
 		return NULL;
 	}
 	struct sniffer_module *sm = (struct sniffer_module *)malloc(sizeof(struct sniffer_module));
 	if(NULL == sm)
 	{
+		dlclose(handle);
 		sniffer_error("alloc memory failed");
 		return NULL;
 	}

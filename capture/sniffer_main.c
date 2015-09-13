@@ -141,11 +141,11 @@ decode(void *arg)
 		}
 		char packet[MAX_PACKET_LEN] = {0};
 		int len = sniffer_module_callback(base->sm, str, sz, packet, MAX_PACKET_LEN); 
+		sniffer_buffer_remove(base->sb, str, len);
 		if(len == 0)
 		{
 			continue;
 		}
-		sniffer_buffer_remove(base->sb, str, len);
 		sniffer_report(base->cfg->stream, "%s", packet);
 	}
 	return NULL;
