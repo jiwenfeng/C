@@ -1,6 +1,8 @@
 *
 engineCode/
 !*.c
+!*.cpp
+!*.lua
 !*.h
 !Makefile
 !*.sh
