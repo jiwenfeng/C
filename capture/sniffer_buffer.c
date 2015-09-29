@@ -144,19 +144,19 @@ int
 sniffer_buffer_push(struct sniffer_buffer *self, ulong sa, ulong da, ushort sp, ushort dp, const char *data, int sz)
 {
 	LOCK(self);
-	struct buffer *itr = NULL;
-	for(itr = self->head; itr != NULL; itr = itr->next)
+	struct buffer **itr = NULL;
+	for(itr = &self->head; *itr != NULL; itr = &(*itr)->next)
 	{
-		struct session *s = itr->s;
+		struct session *s = (*itr)->s;
 		if(s->sa == sa && s->da == da && s->sp == sp && s->dp == dp)
 		{
 			UNLOCK(self);
-			return buffer_push(itr, data, sz);
+			return buffer_push(*itr, data, sz);
 		}
 	}
-	itr = buffer_init(sa, da, sp, dp);
+	*itr = buffer_init(sa, da, sp, dp);
 	UNLOCK(self);
-	return buffer_push(itr, data, sz);
+	return buffer_push(*itr, data, sz);
 }
 
 char *
@@ -196,7 +196,7 @@ sniffer_buffer_remove(struct sniffer_buffer *self, char *str, int sz)
 	{
 		if(IS_SAME_SESSION(b->s, s))
 		{
-			buffer_remoev(b, sz);
+			buffer_remove(b, sz);
 			break;
 		}
 		b = b->next;

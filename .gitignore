@@ -1,1 +1,8 @@
+*
 engineCode/
+!*.c
+!*.h
+!Makefile
+!*.sh
+!*.md
+!config
