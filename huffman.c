@@ -109,13 +109,9 @@ tree_destroy(struct node *root)
 void
 build_huffman_tree(struct node **head, struct node **root)
 {
-	while(1)
+	struct node *node = NULL;
+	for(node = (*head)->next; node != NULL; node = (*head)->next)
 	{
-		struct node *node = (*head)->next;
-		if(NULL == node)
-		{
-			break;
-		}
 		*root = (struct node *)malloc(sizeof(struct node));
 		(*root)->k = (*head)->k + node->k;
 		(*root)->l = *head;
