@@ -21,6 +21,7 @@ struct buffer
 	int lock;
 	int cap;
 	int cur;
+	int offset;
 	char *data;
 	struct buffer *next;
 	struct session *s;
@@ -47,6 +48,7 @@ buffer_init(ulong sa, ulong da, ushort sp, ushort dp)
 	self->lock = 0;
 	self->cap  = 65535;
 	self->cur  = 0;
+	self->offset = 0;
 	struct session *s= (struct session *)malloc(sizeof(struct session));
 	s->sa = sa;
 	s->da = da;
@@ -86,12 +88,13 @@ void
 buffer_remove(struct buffer *b, int sz)
 {
 	LOCK(b);
-	if(sz > b->cur)
+	if(sz > b->offset)
 	{
-		sz = b->cur;
+		sz = b->offset;
 	}
+	b->offset -= sz;
 	b->cur -= sz;
-	memmove(b->data, b->data + sz, b->cur);
+	memmove(b->data, b->data + sz, b->offset);
 	UNLOCK(b);
 }
 
@@ -99,18 +102,18 @@ char *
 buffer_peek(struct buffer *b, int *sz)
 {
 	LOCK(b);
-	if(b->cur == 0)
+	if(b->offset >= b->cur)
 	{
 		UNLOCK(b);
 		return NULL;
 	}
-	int len = sizeof(struct session);
-	char *data = (char *)malloc(b->cur + len);
-	memcpy(data, b->s, len);
-	memcpy(data + len, b->data, b->cur);
-	*sz = b->cur;
+	*sz = b->cur - b->offset;
+	char *data = (char *)malloc(sizeof(struct session) + *sz);
+	memcpy(data, b->s, sizeof(struct session));
+	memcpy(data + sizeof(struct session), b->data + b->offset, *sz);
+	b->offset = b->cur;
 	UNLOCK(b);
-	return data + len;
+	return data + sizeof(struct session);
 }
 
 struct sniffer_buffer *
