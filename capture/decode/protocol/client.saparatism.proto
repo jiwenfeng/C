@@ -1,0 +1,51 @@
+import "client.comm.proto";
+import "client.family.proto";
+
+package client;
+
+
+message saparatism_region_info_req{
+   optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+message saparatism_region_info{
+   required uint32 region_id                       =1;              //区域ID
+   required uint32 region_occuption				   =2;              //0没有占领 1占领
+   optional uint32 family_id					   =3;              //占领军团ID
+   optional uint32 family_occuption_days           =4;              //占领天数
+   optional family_info family                     =5;              //军团信息
+}
+
+message saparatism_region_info_rsp{
+   required bool isopen = 2;			   //活动是否开启
+   required uint32 time = 3;               //没开启的话，下一次开启的时间戳
+   required bool isleader = 4;             //查看面板者是否是军团长
+   required uint32 sceneid = 5;          //查看面板者不是军团长，且存在军团团长所在场景ID
+   repeated saparatism_region_info ri = 1; //九州信息
+}
+
+enum SAPARATISM_AWARD_OPERATOR_RET
+{
+	SAOR_SUCCESS = 0;            //领取成功
+	SAOR_TIME_LIMIT = 1;         //处于割据活动时间限制
+	SAOR_NOT_FAMILY_LIMIT = 2;   //没有加入军团
+	SAOR_NOT_OCCUPTION_LIMIT = 3; //所在军团没有在占领限制
+	SAOR_GET_LIMIT = 4;          //已经领取过     
+}
+
+message saparatism_region_award_req{
+	 required uint32 region_id      =1;              //区域ID
+	 optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+message saparatism_region_award_check{
+	required saparatism_region_award_req req = 1;  //验证
+}
+
+message saparatism_region_award_rsp{
+	 required SAPARATISM_AWARD_OPERATOR_RET ret      =1;             //奖励请求结果
+}
+
+message saparatism_open_pop_rsp				//割据活动开启弹窗
+{
+}

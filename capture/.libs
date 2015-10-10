@@ -1,0 +1,10 @@
+sniffer_capture.o: sniffer_capture.c sniffer.h sniffer_buffer.h \
+ sniffer_capture.h sniffer_log.h
+sniffer_config.o: sniffer_config.c sniffer.h sniffer_log.h \
+ sniffer_config.h
+sniffer_buffer.o: sniffer_buffer.c sniffer_buffer.h sniffer_log.h
+sniffer_log.o: sniffer_log.c sniffer_log.h
+sniffer_module.o: sniffer_module.c sniffer.h sniffer_log.h \
+ sniffer_module.h
+sniffer_main.o: sniffer_main.c sniffer.h sniffer_log.h sniffer_buffer.h \
+ sniffer_config.h sniffer_capture.h sniffer_module.h

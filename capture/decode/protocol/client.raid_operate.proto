@@ -1,0 +1,208 @@
+import "client.comm.proto";
+import "client.role_props.proto";
+
+package client;
+
+enum raid_check_result_e
+{
+	success			= 0;		// 成功
+	raid_error		= 1;		// 副本配置错误
+	vit_limit		= 2;		// 体力不足
+	lvl_limit		= 3;		// 等级不足
+	pet_limit		= 4;		// 美人限制
+	prev_limit		= 5;		// 前置副本未通关
+	num_limit		= 6;		// 副本可挑战次数不足
+	elite_limit		= 7;		// 精英副本对应的普通副本未通关
+	need_reset		= 8;		// 需要重置（过关斩将）
+	main_limit		= 9;		// 当前不在主城
+	team_not_exist	= 10;		// 队伍不存在
+	team_full		= 11;		// 队伍满员
+	team_closed		= 12;		// 队伍不能加入
+	in_team			= 13;		// 已经在队伍中
+	func_closed		= 14;		// 功能未开启
+	invalid_id		= 15;		// 无效的ID
+	prize_not_get	= 16;		// 奖励未领取
+	failed			= 17;		// 失败
+};
+
+message raid_info {
+    required uint32 raid_id                  = 1;
+    required uint32 star_num                 = 2;
+    required uint32 fast_tick                = 3;
+    required uint32 last_complete_time       = 4;
+    required uint32 complete_count           = 5;
+    required uint32 create_time              = 6;
+    required uint32 auto_time                = 7; 
+    required uint32 elite_star_num           = 8; 
+    required uint32 elite_fast_tick          = 9; 
+    required uint32 elite_last_complete_time = 10;
+    required uint32 elite_complete_count     = 11;
+    required uint32 elite_create_time        = 12;
+    required uint32 elite_auto_time          = 13;
+    required uint32 elite_enter_count        = 14;
+}
+
+message raid_info_msg {
+    repeated raid_info ri = 1;
+}
+
+message enter_raid_req {
+    required uint32      raid_id  = 1; // 要进入的副本id
+    enum type {
+        normal = 0;
+        elite  = 1;
+    }
+    optional uint32      t        = 2; // 0普通 1精英
+    optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+message exit_raid_req {
+    required uint32      raid_id  = 1;
+    optional server_head svr_head = 1000;
+}
+
+message raid_open_box_req {
+    required uint32      unixtime = 1;
+    optional server_head svr_head = 1000;
+}
+
+message raid_open_box_rsp {
+    repeated uint32 open_props_ids  = 1;
+    repeated uint32 close_props_ids = 2;
+}
+
+message raid_result_info {
+    required role_data  rd        = 1;
+    repeated props_info props     = 2;
+    optional uint32     coin      = 3[default = 0];
+    optional uint32     exp       = 4[default = 0];
+    optional uint32     tao_lue   = 5[default = 0];
+	optional uint32		strategy  = 6[default = 0];		// 谋略
+}
+
+message raid_success_ic {
+    required uint32 id    = 1;
+    required uint32 count = 2;
+}
+
+message raid_success_info {
+    optional raid_success_ic role  = 1;
+    optional raid_success_ic item  = 2;
+    optional raid_success_ic touch = 3;
+    optional raid_success_ic pos   = 4;
+    optional raid_success_ic block = 5;
+}
+
+message raid_failure_info {
+    optional bool   hero_dead  = 1;
+    optional uint32 role_dead  = 2;
+    optional uint32 timeout    = 3;
+    optional uint32 dead_count = 4;
+    optional uint32 vip_dead   = 5;
+    optional uint32 monster    = 6;
+}
+
+message raid_result_msg {
+    required uint32            raid_id   = 1;
+    required uint32            star      = 2;
+    required uint32            tick      = 3; 
+    repeated raid_result_info  info      = 4;	// 普通奖励
+    optional raid_success_info success   = 5;
+    optional raid_failure_info failure   = 6;
+    optional uint32            rep       = 7;
+	optional raid_verify       verify    = 8;
+	optional string			   value1	 = 9;
+	optional uint32			   value2	 = 10;
+	repeated raid_result_info  reward1	 = 11; // 首杀奖励
+	repeated raid_result_info  reward2	 = 12; // 最快奖励
+
+}
+
+message raid_npc_creazed {
+    required uint32 raid_id = 1;
+}
+
+message auto_raid_req {
+    required uint32      id       = 1; // 0取消扫荡
+    required uint32      num      = 2;
+    optional uint32      t        = 3; // 0普通 1精英
+    optional server_head svr_head = 1000;
+}
+
+message auto_raid_rsp {
+    required uint32 id  = 1;  
+}
+
+message auto_raid_info {
+    required uint32         id                    = 1;
+    required uint32         type                  = 2; 
+    required uint32         start_time            = 3; 
+    required uint32         need_time             = 4; 
+    required uint32         frozen_silver         = 5; 
+    required uint32         frozen_physical_power = 6; 
+    required uint32         count                 = 7; 
+    required uint32         monster               = 8; 
+    required uint32         exp                   = 9; 
+    required uint32         coin                  = 10;
+    required uint32         military_strategy     = 11;
+    repeated props_info     props                 = 12;
+}
+
+message auto_raid_msg {
+    required auto_raid_info info = 1;
+}
+
+message mini_server_req {
+    required uint32      op        = 1;
+    required uint32      raid_id   = 2;
+    optional uint32      raid_type = 3;
+    optional server_head svr_head  = 1000;
+}
+
+message mini_server_rsp {
+    required uint32      op        = 1;
+    required uint32      raid_id   = 2;
+    optional uint32      raid_type = 3;
+    required uint32      time      = 4;
+	required uint32		 ret	   = 5;
+}
+
+message mini_server_end_msg {
+    required raid_result_msg msg = 1;
+    optional uint32	     rep = 2;
+}
+
+message raid_verify {
+	required uint32 max_hp  = 1;
+	required uint32 max_atk = 2;
+	required uint32 max_def = 3;
+	required uint32 bow_index = 4;
+}
+
+message reported_raid_info {
+    required uint32 id            = 1;
+    required uint32 star          = 2;
+    required uint32 used_tick     = 3;
+    required uint32 complete_time = 4;
+    required uint32 type          = 5;
+    required uint32 time          = 6;
+    required string key           = 7;
+    optional raid_success_info success   = 8;
+    optional raid_failure_info failure   = 9;
+	required raid_verify       verify    = 10;
+}
+
+message reported_raid_req {
+    repeated reported_raid_info rri      = 1;
+    optional server_head        svr_head = 1000;
+}
+
+message create_npc_msg {
+    required string content = 1;
+    required uint32 delay   = 2;
+    required uint32 show    = 3;
+}
+
+message dead_in_raid {
+    required uint32 time = 1;
+}

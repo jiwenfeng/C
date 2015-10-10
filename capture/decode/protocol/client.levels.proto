@@ -1,0 +1,45 @@
+import "client.comm.proto";
+package client;
+
+// 单个武将信息
+message level_hero_info
+{
+	required uint32 id = 1;
+	required uint32 level = 2;  // 关卡武将等级
+	required uint32 power = 3;
+}
+
+// 单个关卡信息
+message level_info
+{
+	required uint32 id = 1;		// 关卡ID
+	repeated level_hero_info lhi = 2;
+}
+
+// 请求关卡列表
+message levels_list_req
+{
+	required uint32 time = 1;
+	optional server_head svr_head = 1000;
+}
+
+message levels_list_rsp
+{
+	repeated level_info li = 1;
+	required uint32 cur = 2;
+	required uint32 tail = 3;
+	required uint32 max_level = 4;
+}
+
+// 重置关卡
+message levels_reset_req
+{
+	required uint32 time = 1;
+	optional server_head svr_head = 1000;
+}
+
+message levels_reset_rsp
+{
+	// 0 成功 1 次数不足 2 失败
+	required uint32 ret = 1;
+}

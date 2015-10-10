@@ -1,0 +1,77 @@
+import "client.comm.proto";
+package client;
+
+message attack_cell {
+    required float x = 1;
+    required float y = 2;
+}
+
+// 攻击
+message attack_req {
+    required uint32      skill_id = 1;    // 技能ID
+    repeated role_data   rd       = 2;    // 施放目标信息
+    optional attack_cell ac       = 3;    // 攻击格子
+    required uint32      id       = 4;    // 攻击索引
+    optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+// 冲撞产生的位置移动消息
+message attack_collision_data {
+    required uint32         move_speed = 1;
+    required client_map_pos pos        = 2;
+}
+
+message fight_data {
+    optional role_data dst_rd      = 1; // 目标信息
+    enum TYPE
+    {
+        attk_miss   = 0;   // 没命中
+        attk_metal  = 1;   // 金攻击
+        attk_wood   = 2;   // 木攻击
+        attk_water  = 3;   // 水攻击
+        attk_fire   = 4;   // 火攻击
+        attk_soil   = 5;   // 土攻击			
+        attk_normal = 6;   // 普通攻击	
+        attk_return = 7;   // 反弹伤害
+        attk_dodge  = 8;   // 攻击闪避
+        attk_inc    = 9;   // 属性增加
+        attk_dec    = 10;  // 属性降低
+        attk_pos    = 11;  // 位置改变
+        attk_buff   = 12;  // 增加BUFF
+        attk_far    = 13;  // 距离太远
+    }
+    
+    required TYPE   fight_type  = 2; // 战斗数据: 战斗的类型
+    optional uint32 critical    = 3; // 爆击状态: 0 = 没有爆击, 否则 = 爆击
+    optional uint32 data        = 4; // 产生的数据
+
+    optional attack_collision_data acd    = 5; // 冲撞
+    optional bool                  dead   = 6; // 是否死亡
+    optional client_map_pos        pos    = 7; // 无目标时攻击的坐标
+    optional uint32                cur_hp = 8; // 当前血量
+}
+
+message attack_rsp {
+    required role_data   src_rd   = 1;  // 攻击方信息
+    optional attack_cell ac       = 2;  // 攻击格子
+    required uint32      skill_id = 3;  // 技能ID
+    repeated fight_data  fd       = 4;  // 战斗的信息
+    required uint32      id       = 5;  // 客户端上报的攻击索引
+    optional bool        def      = 6;
+}
+
+// 附近NPC坐标
+message nearby_npc_pos_req {
+    required uint32      unixtime = 1;
+    optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+message nearby_npc_pos_rsp {
+    repeated client_map_pos pos = 1;
+    required uint32         ret = 2;
+}
+
+// 仇恨列表
+message hate_list {
+	repeated role_name target = 1;
+}

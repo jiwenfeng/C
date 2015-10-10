@@ -1,0 +1,139 @@
+import "client.comm.proto";
+import "client.role_props.proto";
+import "client.raid_operate.proto";
+
+package client;
+
+/*************服务器用********************/
+
+message helper_info
+{
+	required uint32 role_id = 1;
+	required uint32 time = 2;
+}
+
+message cycle_helpers
+{
+	repeated helper_info hi = 1;
+}
+
+message cycle_passed_levels
+{
+	repeated uint32 level = 1;
+}
+
+message cycle_level_info
+{
+	required uint32 level = 1;
+	required uint32 update = 2; // 是否更新tick 0不更新
+	required uint32 time = 3;	// 通关时间
+	optional uint32 tick = 4;   // 通关时长
+}
+
+message cycle_add_helped_count
+{
+	required uint32 role_id = 1;
+}
+
+message cycle_fetch_helpers
+{
+	required uint32 level = 1;
+	required server_head svr_head = 2;
+	repeated uint32 except = 3;
+}
+
+message cycle_update_record_req
+{
+	required uint32 level = 1;
+	required uint32 update = 2;
+	required uint32 role_id = 3;
+	required uint32 raid_id = 4;
+	required uint32 tick = 5;
+    optional raid_success_info success   = 6;
+}
+
+message cycle_update_record_rsp
+{
+	required uint32 role_id= 1;
+	required uint32 level = 2;
+	required uint32 update = 3;
+	required uint32 tick = 4;
+	required uint32 raid_id = 5;
+	optional string role_name = 6;
+	optional uint32 record = 7;
+    optional raid_success_info success   = 8;
+}
+
+/****************以上*********************/
+
+/*****************客户端用****************/
+
+// 界面信息
+message cycle_info_req
+{
+	required uint32 level = 1; // 填0 表示当前挑战层数
+	optional server_head svr_head = 1000;
+}
+
+message cycle_info_rsp
+{
+	required uint32 role_id = 1;
+	required uint32 level = 2;
+	required uint32 top = 3;
+	optional uint32 record = 4; // 0 没有通关记录(秒)
+	optional string role_name = 5; // 最快玩家名字
+	optional uint32 tick = 6; // 最快时间(秒)
+	optional bool	award = 7; // 是否已获得最快奖励
+	optional uint32	type = 8; // 奖励类型(0 首杀 1 再杀 2 没有)
+	optional uint32 count = 9; // 邀请次数
+}
+
+// 挑战
+message cycle_challenge_req
+{
+	required uint32 level = 1;
+	optional uint32 helper = 2; // 没有不填或填0
+	optional server_head svr_head = 1000;
+}
+
+// 掠阵列表
+message cycle_helpers_req
+{
+	required uint32 level = 1;
+	optional server_head svr_head = 1000;
+}
+
+message cycle_helper_info
+{
+	required uint32 role_id = 1;
+	required string role_name = 2;
+	required uint32 fighting_power = 3;
+	required uint32 count = 4;
+}
+
+message cycle_helpers_rsp
+{
+	required uint32 time = 1;
+	repeated cycle_helper_info chi = 2;
+}
+
+// 扫荡
+message cycle_mopup_req
+{
+	required uint32 time = 1;
+	optional server_head svr_head = 1000;
+}
+
+message cycle_mopup_result
+{
+	required uint32 level = 1;
+	optional raid_result_info rri = 2;
+}
+
+message cycle_mopup_rsp
+{
+	repeated cycle_mopup_result cmr = 1;
+	required uint32 time = 2;
+}
+
+/******************以上*******************/

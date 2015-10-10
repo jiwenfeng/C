@@ -1,0 +1,17 @@
+import "client.comm.proto";
+package client;
+
+// 用户登录游戏时的角色位置通知
+message role_pos_msg {
+    required uint32           map_id	= 1;              // 地图ID
+    required uint32           scene_id	= 2;              // 场景ID
+    repeated role_data        rds       = 3;              // 角色摘要信息
+    repeated client_map_pos   mps       = 4;              // 位置信息
+    optional uint32           inst_id   = 5[default = 0]; // 场景实例ＩＤ，只有在上一个场景ＩＤ与本次场景ＩＤ一致，而且该字段有值时才需要客户端去做比较
+	optional uint32           type      = 6[default = 0]; // 0 普通 1 跨服
+	
+    optional server_head svr_head       = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+
+

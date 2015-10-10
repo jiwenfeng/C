@@ -1,0 +1,63 @@
+import "client.comm.proto";
+package client;
+
+ // 排行榜类型
+enum RANK_TYPE {
+    RANK_PERSONAL_POWER      = 0 ; // 个人战斗力
+    RANK_PERSONAL_LEVEL      = 1 ; // 个人等级
+	RANK_MOUNT				 = 2 ; // 坐骑排行榜
+	RANK_POTENTIAL			 = 3 ; // 心法排行榜
+	RANK_BOWS                = 4 ; // 弓箭排行榜
+	RANK_GEMS	             = 5 ; // 宝石排行榜
+	RANK_EQUIP_POWER		 = 6 ; // 人物+美人装备战力排行榜
+	RANK_GEMS_INTEGRAL		 = 7 ; // 宝石积分排行榜
+    RANK_COUNT = 18;
+}
+
+message rank_rule
+{
+	required uint32 role_id = 1;
+	optional uint32 first = 2 [default = 0];
+	optional uint32 second = 3 [default = 0];
+	optional uint32 third = 4 [default = 0];
+	optional uint32 forth = 5 [default = 0];
+}
+
+message rank_data 
+{
+	optional rank_rule ru_show = 1;
+	optional rank_rule ru_real = 2;
+}
+
+message rank_item
+{
+	required uint32 role_id = 1;
+	required uint32 value = 2;
+	optional string role_name = 3;
+	optional uint32 vip_lv = 4;
+	optional uint32 profession = 5;
+}
+
+message rank_list_req
+{
+	required RANK_TYPE rt = 1;
+	optional server_head svr_head = 1000;
+}
+
+message rank_list_rsp
+{
+	required RANK_TYPE rt = 1;			// 榜单类型
+	repeated rank_item ri = 2;			// 排行榜内容
+}
+
+message rank_add_data
+{
+	required RANK_TYPE rt = 1;
+	required rank_rule ru = 2;
+}
+
+message act_rank_add_data {
+	required RANK_TYPE rt = 1;
+	required rank_rule ru = 2;
+	required uint32 limit_value  = 3;
+}

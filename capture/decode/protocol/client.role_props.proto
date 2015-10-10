@@ -1,0 +1,385 @@
+import "client.comm.proto";
+import "client.poll_activity.proto";
+package client;
+
+message embed {
+    required uint32 hole_id = 1;
+    required uint32 gem_id  = 2;
+}
+
+message expend_item_info {
+	optional uint32 expend_id = 1;
+	optional uint32 expend_count = 2;
+}
+
+message props_info {
+    enum POS {
+        SHOW    = 0; // 展示位
+        PACK    = 1; // 背包
+        DEPOT   = 2; // 仓库
+        ROLE    = 3; // 角色身上 
+        EXPLORE = 4; // 临时背包
+        TASK    = 5; // 任务背包
+        SCENE   = 6; // 场景掉落
+        TEMP    = 7; // 临时空间
+    }
+    
+    required uint32    pos           = 1 ; // 存放位置
+    required uint32    grid_index    = 2 ; // 存放格子 
+    required uint32    props_id      = 3 ; // 道具ID
+    required uint32    count         = 4 [default = 1]; // 物品数量
+    required uint32    quality       = 5 [default = 1]; // 物品品质1白2绿3蓝4紫5橙6红
+    required uint32    bind          = 6 [default = 0]; // 是否绑定0未绑定1已绑定
+    repeated attribute attr          = 7 ;
+    repeated embed     gem           = 8 ;
+    optional uint32    hole          = 9 [default = 0];
+    optional uint32    authed        = 10[default = 0]; // 是否已经鉴定0未鉴定1已鉴定
+    optional uint32    level         = 11[default = 0];
+    optional uint32    creator_id    = 12[default = 0]; // 创建者ID
+    optional uint32    active_time   = 13[default = 0]; // 剩余时间
+    optional uint32    end_date      = 14[default = 0]; // 到期时间
+	repeated attribute last_attr     = 15; // 上一次洗练的数据
+	repeated attribute upgrade_attr  = 16; // 强化属性值
+	optional uint32	   expend_money  = 17; // 消耗过的铜币（洗练的）
+	repeated expend_item_info info   = 18; // 消耗过的物品数据（洗练的）
+	optional uint32    system_id     = 19[default = 0]; // 系统ID
+	optional uint32	   to_type		 = 20;	// 超时类型
+	optional uint32	   timeout		 = 21;	// 超时时间戳
+	optional bool	   is_due		 = 22[default = false];// true 为过期~   
+}
+
+// 用户装备道具物品消息
+message role_props_msg {
+    required role_data  rd = 1;  // 用户信息
+    repeated props_info pi = 2;  // 物品信息
+}
+
+// 使用道具
+message use_props_req {
+    required uint32    grid_index  = 1; // 道具格子
+    required uint32    use_num     = 2; // 使用个数
+	optional role_data rds         = 3; // 使用目标
+    
+    optional server_head svr_head  = 1000;
+}
+
+enum ITEM_OPERATE_TYPE
+{
+	ITEM_OPERATE_TYPE_SUCCESS		       = 0; // 物品使用成功
+	ITEM_OPERATE_TYPE_CONFIG_ERRO		   = 1; // 配置表数据错误
+	ITEM_OPERATE_TYPE_OBJECT_NULL          = 2; // 使用对象为空
+	ITEM_OPERATE_TYPE_HP_HAS_MAX		   = 3; // 血量已满无法使用
+	ITEM_OPERATE_TYPE_SPACE_NOT_ENOUGH	   = 4; // 背包空间不足，无法使用
+	ITEM_OPERATE_TYPE_PET_LEVEL_HAS_MAX	   = 5; // 宠物等级已满，无法使用药水
+	ITEM_OPERATE_TYPE_USE_LIMIT			   = 6; // 使用受限
+	ITEM_OPERATE_TYPE_ITEM_NOT_ENOUGH      = 7; // 道具不足，无法合成
+	ITEM_OPERATE_TYPE_ITEM_IS_DUE		   = 8; // 物品已过期
+}
+
+message use_props_rsp {
+    required ITEM_OPERATE_TYPE        opt_type		  = 1;
+    optional uint32					  grid_index	  = 2;
+	optional role_data				  rds			  = 3; // 使用目标
+}
+
+// 物品出售
+message sell_props_req {
+	required uint32 grid_index		= 1;
+	required uint32 props_count		= 2;
+	optional server_head svr_head	= 1000;
+}
+
+enum SELL_RESULT_E
+{
+	SELL_RESULT_SUCCESS		= 0;// 出售成功
+	SELL_RESULT_NOT_SELL	= 1;// 不能出售该物品
+}
+
+// 物品出售返回
+message sell_props_rsp {
+	required uint32 grid_index		= 1;
+	required uint32 result_type		= 2;
+}
+
+// 移动格子中物品
+message move_props_req {
+    required uint32 src_grid_index = 1; // 源格子索引
+    required uint32 dst_grid_index = 2; // 移动至目标格子索引
+
+    optional server_head svr_head  = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+// 装备物品
+message equip_props_req {
+    required uint32 src_grid_index = 1; // 源格子索引
+    required uint32 dst_grid_index = 2; // 移动至目标格子索引
+
+    optional server_head svr_head  = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+message equip_props_rsp {
+	required uint32 clear_grid_index = 1;  // 背包上的移除的格子
+	optional uint32 add_grid_index   = 2;  // 脱下来的装备的格子
+}
+
+// 物品掉落详情
+message drop_props_info {
+    repeated uint32     belong       = 1; // 所属角色ID 空为所有人可拾取
+    required uint32     index        = 2; // 掉落编号
+    required uint32     x            = 3; // 掉落物品座标
+    required uint32     y            = 4;
+    required uint32     z            = 5;
+    required uint32     end_time     = 6;
+    required uint32     protect_time = 7;
+    required props_info pi           = 8;
+}
+
+// 物品掉落消息
+message drop_props_msg {
+    enum METHOD {
+        ADD = 1; // 增加
+        DEL = 2; // 删除
+    }
+    
+    required METHOD            m = 1; // 掉落方法
+    repeated drop_props_info dpi = 2; // 掉落的道具 
+}
+
+// 拾取掉落物品
+message pick_up_props_req {
+    repeated uint32      index    = 1; // 掉落编号
+    optional server_head svr_head = 1000;
+}
+
+message pick_up_props_rsp {
+    enum result {
+        success       = 1; // 成功
+        not_your      = 2; // 不属于你
+        backpack_full = 3; // 背包满
+        null          = 4; // 场景上没这物品
+    } 
+    repeated uint32 index = 1;
+    required result ret   = 2;
+}
+
+enum UPGRADE_TYPE
+{
+	UT_STRENGTHE   = 0; // 强化
+	UT_UPGRADE     = 1; // 升阶(升星)
+}
+
+message upgrade_equip_req {
+    required uint32   grid_index    = 1; // 格子索引
+	required uint32   target_level  = 2; // 目标强化的等级
+    optional server_head svr_head  = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+message upgrade_equip_rsp{
+    enum result {
+        success     = 1; // 成功
+        failed      = 2; // 失败
+    }
+    required uint32 grid_index   = 1;
+    required result result_type  = 2;
+
+}
+
+message melting_equip_req{
+	required uint32 melting_type = 1;// 熔炼类型 0 一键 1 单个
+    repeated uint32 grid_index	 = 2;
+    optional server_head svr_head  = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+message melting_equip_rsp{
+    enum result {
+        success     = 1; // 成功
+        failed      = 2; // 失败
+    }
+    required result result_type  = 1;
+}
+// 铸造
+message cast_equip_req{
+    required uint32 equip_id = 1;
+    optional server_head svr_head  = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+message cast_equip_rsp{
+    enum result {
+        success     = 1; // 成功
+        failed      = 2; // 失败
+    }
+    required result result_type  = 1;
+    required props_info pi = 2;  // 物品信息
+}
+// 寻宝
+message treasure_req {
+	required uint32		 treasure_count = 1	  ; // 寻宝的次数
+	optional server_head svr_head		= 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+// 寻宝返回
+message treasure_rsp {
+	required uint32 result_type			= 1; // 结果 0 成功 1失败：获得上限 2 背包不足
+	repeated uint32 treasure_lost	    = 2; // 寻宝的位置ID集合
+}
+
+enum BAPTIZE_TYPE_E
+{
+	BAPTIZE_TYPE_MONEY = 1;
+	BAPTIZE_TYPE_ONE   = 2;
+	BAPTIZE_TYPE_TWO   = 3;
+}
+// 洗炼装备
+message baptize_req {
+	required uint32     baptize_type        = 1	  ; // 洗练的类型： 1 铜钱 2 一级洗练3 二级洗练
+	required uint32		grid_index		    = 2	  ; // 洗练当前物品的格子
+	optional server_head svr_head			= 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+enum BAPTIZE_RESULT_TYPE_E
+{
+	BAPTIZE_RESULT_TYPE_SUCESS = 0; // 成功
+	BAPTIZE_RESULT_TYPE_FAILD  = 1; // 失败
+}
+
+message baptize_rsp {
+	required uint32 result_type		= 1; // 0 成功 1失败
+	required uint32 grid_index		= 2; 
+}
+// 洗练保存
+message baptize_save_req {
+	required uint32 grid_index				= 1	  ; // 
+	optional server_head svr_head			= 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+message baptize_save_rsp {
+	required uint32 result_type		= 1; // 0 保存成功 1 保存失败
+	required uint32 grid_index		= 2;
+}
+
+enum ITEM_USE_SUB_TYPE_E
+{
+	SUB_TYPE_ACQUIRE_SKILL    = 0; // 获得技能
+	SUB_TYPE_ACQUIRE_BUFF	  = 1; // 获得BUFF
+	SUB_TYPE_ACQUIRE_TASK	  = 2; // 获得任务
+	SUB_TYPE_OPEN_GIFT		  = 3; // 打开礼包
+	SUB_TYPE_MOUNT_UPGRATE    = 18; // 坐骑升级
+	SUB_TYPE_PET_UPGRATE	  = 19; // 美人升级
+	SUB_TYPE_BOW_UPGRATE	  = 27; // 弓箭升级
+	SUB_TYPE_BOW_SKILL_STUDY  = 28; // 弓箭技能学习
+	SUB_TYPE_MONTH			  = 29; // 月卡
+}
+
+enum ITEM_MEDICINCE_SUB_TYPE_E
+{
+	SUB_TYPE_CHANGE_HP_PRE				= 0; // 改变玩家生命值的百分比
+	SUB_TYPE_CHANGE_EXP					= 1; // 改变玩家当前的经验
+	SUB_TYPE_CHANGE_TAEL				= 2; // 改变玩家当前铜钱
+	SUB_TYPE_CHANGE_STRATEGY			= 3; // 改变玩家当前韬略
+	SUB_TYPE_CHANGE_LEVEL				= 4; // 改变玩家当前等级
+	SUB_TYPE_CHANGE_PK_VALUE			= 5; // 改变玩家当前PK值
+	SUB_TYPE_CHANGE_RELIVE				= 6; // 玩家复活
+	SUB_TYPE_CHANGE_MOUNT_BLESS			= 7; // 改变坐骑祝福值
+	SUB_TYPE_CHANGE_BOW_BLESS			= 8; // 增加弓箭祝福值
+	SUB_TYPE_CHANGE_EXP_PRE				= 9; // 增加当前人物经验的百分比
+	SUB_TYPE_CHANGE_SOWAR_WEAPON_EXP	= 10;// 增加骑战兵器进度值
+	SUB_TYPE_CHANGE_MILITAR_VALUE		= 11;// 增加军功值
+	SUB_TYPE_CHANGE_SHAP_CHANGE         = 12;// 变身
+	SUB_TYPE_CHANGE_CLEAN_SHAP          = 13;// 清理变身
+	SUB_TYPE_CHANGE_POWER				= 14;// 改变玩家当前体力
+	SUB_TYPE_CHANGE_INGOT				= 15;// 改变玩家当前元宝
+}
+// 收取临时背包东西
+message collect_explore_req {
+	required uint32 collect_type			= 1		; // 0 全部收取
+	optional server_head svr_head			= 1000  ; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+enum COLLECT_RESULT_TYPE_E
+{
+	COLLECT_RESULT_TYPE_SUCCESS			 = 1;
+	COLLECT_RESULT_TYPE_NOT_ENOUGH_SPACE = 2;
+}
+
+message collect_explore_rsp {
+	required uint32  result_type = 1;
+}
+// 玩家购买记录的数据
+message record_item_info {
+	optional uint32 item_id		= 1;
+	optional uint32 item_count  = 2;
+}
+
+// 记录寻宝的物品与次数（改为记录物品的ID还有数量：黑市使用）
+message treasure_db_info {
+	optional uint32 item_id			    = 1[default = 0]; // 购买的物品ID（）
+	optional uint32 item_count			= 2[default = 0]; // 数量
+	optional uint32 shop_id				= 3;// 商店ID 黑市商店默认为0
+}
+
+// 数据库存储结构
+message black_shop_db_info {
+	optional uint32 item_slot  = 1;
+	optional uint32 item_id    = 2;
+	optional uint32 item_count = 3;
+	optional uint32 key_id     = 4;
+	optional bool   is_buy     = 5[default = false];
+}
+// 服务器自己使用
+message shop_info {
+	optional uint32 item_id     = 1;
+	optional uint32 item_count  = 2;
+	optional uint32 probability = 3;
+	optional uint32 key_id		= 4;
+}
+// 请求黑市商店物品列表
+message black_shop_req {
+    required uint32      unixtime = 1;
+    optional server_head svr_head = 1000;
+}
+
+enum BLACK_SHOP_RESULT_TYPE_E {
+	BLACK_SHOP_RESULT_TYPE_REFLESH_SUCCESS = 1;
+	BLACK_SHOP_RESULT_TYPE_SUCCESS         = 2;
+	BLACK_SHOP_RESULT_TYPE_CONFIG_ERRO	   = 3;
+	BLACK_SHOP_RESULT_TYPE_ITEM_NOT_ENOUGH = 4;
+	BLACK_SHOP_RESULT_TYPE_MELTING_NOT_ENOUGH = 5;
+	BLACK_SHOP_RESULT_TYPE_REFLESH_COUNT_NOT_ENGOUH = 6;
+	BLACK_SHOP_RESULT_TYPE_REFLESH_FAILD   = 7;
+}
+
+// 黑市商店物品列表返回
+message black_shop_rsp {
+	required uint32     result_type      = 1;
+	optional uint32		reflesh_count    = 2;
+	optional uint32		time             = 3;
+	repeated black_shop_db_info	info	 = 4;
+}
+// 黑市商店刷新请求
+message black_shop_reflesh_req {
+	required uint32      unixtime = 1;
+    optional server_head svr_head = 1000;
+}
+// 刷新返回
+message black_shop_reflesh_rsp {
+	required uint32     result_type		 = 1;
+	optional uint32		reflesh_count    = 2;
+	optional uint32		time             = 3;
+	repeated black_shop_db_info	info	 = 4;
+}
+// 黑市商店购买请求
+message black_shop_buy_req {
+	required uint32 item_slot = 1;
+	optional server_head svr_head = 1000;
+}
+// 黑市商店购买返回
+message black_shop_buy_rsp {
+	required uint32 item_slot     = 1;
+	required uint32 result_type   = 2; // 0 成功 1失败
+	repeated black_shop_db_info	info	 = 3;
+}
+// 物品使用展示
+message use_props_show_rsp{
+	required uint32 rsp_type	 = 1; // 展示渠道：1 物品使用
+	repeated show_item show_info = 2;
+}

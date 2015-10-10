@@ -1,0 +1,8 @@
+import "client.comm.proto";
+
+package client;
+
+message exit_miniserver {
+    required uint32      unixtime = 1;
+    optional server_head svr_head = 1000;
+}

@@ -1,0 +1,49 @@
+import "client.comm.proto";
+package client; 
+
+message offline {
+    required uint32 user_id = 1;
+	required uint32 role_id = 2;
+	required uint32 scene_server_id = 3;
+	optional bool   active = 4[default=false];
+	
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+message user_lose {
+    required uint32 role_id = 1;
+}
+
+message offline_timelong_req
+{
+	required uint32 time = 1;
+	optional server_head svr_head = 1000;
+}
+
+message offline_timelong_rsp
+{
+	required uint32 time = 1; // 单位秒
+	required uint32 total = 2;
+}
+
+message offline_reward_req
+{
+	required uint32 type = 1; // 1 一倍 3 3倍 10 10倍
+	optional server_head svr_head = 1000;
+}
+
+message offline_reward_rsp
+{
+	required uint32 ret = 1;	// 0 成功 1 失败 
+}
+
+message offline_load_image
+{
+	required uint32 scene_id = 1;
+	required uint32 limit_tl = 2;
+	optional uint32 limit_lv = 3 [default = 0];
+	optional uint32 limit_power = 4 [default = 0];
+	repeated uint32 role = 5;			// 不允许抽出来的人
+	repeated uint32 family = 6;			// 
+	optional uint32 flag = 7 [default = 0]; // flag 为0表示不允许抽出family 1 表示只允许在family里面抽
+}

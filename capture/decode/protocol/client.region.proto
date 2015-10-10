@@ -1,0 +1,25 @@
+import "client.comm.proto";
+import "client.raid_operate.proto";
+
+package client;
+
+message region_feature {
+    optional float exp_magnification = 1;
+    optional float atk_magnification = 2;
+    optional float def_magnification = 3;
+}
+
+message region_info {
+    required uint32            id      = 1;
+    optional raid_success_info feature = 2;
+}
+
+message region_info_msg {
+    repeated region_info infos = 1;
+}
+
+// 通知区域完成
+message region_complete_msg {
+    repeated region_info infos = 1;
+}
+

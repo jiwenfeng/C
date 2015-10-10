@@ -1,0 +1,13 @@
+import "client.comm.proto";
+package client;
+
+// 查询角色名的角色id
+message select_name_role_id
+{
+    required string role_name = 1; // 角色名
+	required uint32 role_id   = 2[default = 0]; // 角色ID，如果不存在此角色名，则返回0
+	
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+

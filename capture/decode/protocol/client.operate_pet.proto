@@ -1,0 +1,196 @@
+import "client.comm.proto";
+package client;
+
+
+
+// 宠物技能信息
+message pet_skill_info{
+    required uint32 skill_id         = 1[default = 0];  // 技能ID 
+    required uint32 skill_level      = 2[default = 0];  // 技能等级         
+    required uint32 skill_grid_index = 3[default = 0];  // 技能序号，目前最大8个技能，为1－8       
+    required uint32 end_cd_time      = 4[default = 0];  // 技能冷却时间  
+}
+
+enum ROLE_PET_STATUS_E
+{
+    RPSE_REST  = 0; // 休息
+    RPSE_FIGHT = 1; // 出战
+}
+
+// 宠物的详细信息
+message pet_info {
+    required uint32 serial             = 1[default = 0];   // 索引序号 . 0-5           
+    required uint32 pet_id             = 2[default = 0];   // 宠物的系统ID       
+    required string name               = 3;                // 用户自己取的名字   
+    required uint32 max_life           = 4[default = 0];   // 最大生命值     
+    required uint32 cur_life           = 5[default = 0];   // 当前生命值     
+    required uint32 max_power          = 6[default = 0];   // 最大仙气值                
+    required uint32 cur_power          = 7[default = 0];   // 当前仙气值     
+    required uint32 attack             = 8[default = 0];   // 攻击力值     
+    required uint32 defense            = 9[default = 0];   // 防御力值       
+    required uint32 hitpoint           = 10[default = 0];  // 命中值       
+    required uint32 dodge              = 11[default = 0];  // 闪避值         
+    required uint32 critical           = 12[default = 0];  // 暴击值         
+    required uint32 agisity            = 13[default = 0];  // 灵力值
+    required uint32 tougnen            = 14[default = 0];  // 韧性值         
+    required uint32 strength           = 15[default = 0];  // 战斗力         
+    required uint32 status             = 16[default = 0];  // 出战状态，0为休息 1为出战         
+    required uint32 bless              = 17[default = 0];  // 祝福值，100封顶
+    required uint32 experience         = 18[default = 0];  // 当前经验
+    required uint32 order_ratio        = 19[default = 0];  // 进阶增加属性系数百分比       
+    required uint32 quality_ratio      = 20[default = 0];  // 洗品增加属性系数百分比
+    required uint32 level              = 21[default = 0];  // 等级
+    required uint32 class_lv           = 22[default = 0];  // 进阶等级
+    
+    repeated pet_skill_info  psi       = 23;               // 宠物拥有的技能          
+}
+
+// 新增加宠物通知客户端包
+message pet_add_msg {
+    repeated pet_info pi  = 1; // 用户的宠物信息
+}
+
+// 宠物数据更新客户端通知包
+message pet_update_msg {
+    repeated pet_info pi  = 1; // 用户的宠物信息
+}
+
+// 宠物放生请求
+message pet_remove_req{
+    required uint32 serial = 1; // 索引序号 . 1-6 
+    required uint32 pet_id = 2; // 宠物ID,确保放生的宠物的正确性
+    
+    optional server_head svr_head = 1000;  // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+// 放生宠物通知客户端包
+message pet_remove_msg {
+    required uint32 serial = 1; // 索引序号 . 1-6 
+    required uint32 pet_id = 2; // 宠物ID,如果为0，就表示放生失败
+}
+
+
+// 出战宠物的请求
+message pet_fight_req {
+    required uint32 serial = 1; // 请求出战的索引序号，用服务端下发的值，取值范围 0-5 
+    
+    optional server_head svr_head = 1000;  // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+// 宠物出战结果码
+enum PET_FIGHT_RET_E
+{
+    PTRE_SUCCESS    = 0; // 宠物出战成功 
+    PTRE_FIGHTED    = 1; // 宠物已经在出战中
+    PTRE_LIFE_LIMIT = 2; // 生命值受限不能出战
+    PTRE_FAILED     = 3; // 其它系统错误 
+} 
+
+// 宠物出战结果返回包
+message pet_fight_rsp {
+    required uint32 serial       = 1; // 出战的索引序号
+    required PET_FIGHT_RET_E ret = 2; // 宠物出战结果   
+}
+
+// 休息宠物的请求
+message pet_rest_req {
+    required uint32 serial = 1; // 请求休息的索引序号，用服务端下发的值，取值范围 0-5 
+    
+    optional server_head svr_head = 1000;  // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+// 宠物休息结果码
+enum PET_REST_RET_E
+{
+    PRRE_SUCCESS    = 0; // 宠物休息成功
+    PRRE_RESETED    = 1; // 宠物已经在休息中
+    PRRE_FAILED     = 2; // 其它系统错误 
+} 
+
+// 休息宠物的结果
+message pet_rest_rsp {
+    required uint32 serial = 1; // 请求休息的索引序号，用服务端下发的值，取值范围 0-5 
+    required PET_REST_RET_E ret = 2; // 休息宠物结果
+}
+
+// 宠物改名
+message pet_rename_req {
+    required uint32 serial       = 1; // 出战的索引序号
+    required string name         = 2; // 要改的名字
+    
+    optional server_head svr_head = 1000;  // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+// 宠物改名结果
+message pet_rename_rsp {
+    required uint32 serial       = 1; // 出战的索引序号
+    required bool   success      = 2; // 是否成功
+    optional string name         = 3; // 已经修改的名字
+}
+
+// 宠物进阶
+message pet_upgrade_req {
+    required uint32 serial   = 1; // 进阶的索引序号
+    required bool   auto_buy = 2; // 是否自动购买道具
+    
+    optional server_head svr_head = 1000;  // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+enum PET_UPGRADE_RET_E {
+    PURE_SUCCESS  = 0; // 进阶是否成功
+    PURE_NOMOENY  = 1; // 没有钱了
+    PURE_NOMAT    = 2; // 没有材料了
+    PURE_PETLIMIT = 3; // 宠物限制如法进阶
+    PURE_BLESS    = 4; // 进阶失败增加祝福值
+}
+
+// 宠物进阶结果 1398
+message pet_upgrade_rsp {
+    required uint32 serial   = 1; // 进阶的索引序号
+    required PET_UPGRADE_RET_E ret = 2; // 进阶结果,成功会发送pet_update_msg
+    optional uint32 bless_val  = 3; // 祝福值，失败时才会发送
+}
+
+// 宠物洗炼类型
+enum PET_RESET_TYPE_E {
+    PRTE_XTJ  = 1; // 小天劫
+    PRTE_DTJ  = 2; // 大天劫
+    PRTE_SJT  = 3; // 四九天劫
+    PRTE_JJT  = 4; // 九九天劫
+}
+
+// 宠物洗炼请求
+message pet_reset_req {
+    required uint32           serial   = 1;      // 洗炼宠物索引号
+    required PET_RESET_TYPE_E type     = 2;      // 洗炼宠物类型 
+    required uint32           auto     = 3;      // 自动购买
+    optional server_head      svr_head = 1000;   // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+// 宠物洗炼结果
+enum PET_RESET_RET_E {
+    PRESETRE_SUCCESS      = 1; // 成功
+    PRESETRE_NOMONEY      = 2; // 没有足够的铜币
+    PRESETRE_NOMAT        = 3; // 材料不足
+    PRESETRE_PETLIMIT     = 4; // 宠物限制无法洗炼
+}
+
+// 宠物洗炼结果
+message pet_reset_rsp {
+    required uint32 serial          = 1; // 洗炼宠物的索引号
+    required PET_RESET_RET_E ret    = 2; // 宠物洗炼结果 ,如果洗炼成功会发送pet_update_msg
+}
+
+// 学习宠物技能
+message pet_learn_skill_req {
+    required uint32      grid_index = 1; // 技能书所在格子
+    required uint32      serial     = 2; // 宠物的索引
+    optional server_head svr_head   = 1000; // 
+}
+
+message pet_learn_skill_rsp {
+    required uint32 ret        = 1; // 0 成功 1 错误索引 2 错误技能书 3 宠物品质不够 4 技能满级 5 此宠物不能学此技能 6 技能没激活 7 技能当前级不对
+    required uint32 serial     = 2; // 宠物索引
+    required uint32 grid_index = 3; // 技能书所在格子
+}
+

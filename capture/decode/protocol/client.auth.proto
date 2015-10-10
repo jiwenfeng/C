@@ -1,0 +1,45 @@
+import "client.create_role.proto";
+import "client.comm.proto";
+package client;
+
+message auth_req {
+    required string  openid      = 1;    // 
+    required string  openkey     = 2;    // 
+    required uint32  yel_vip     = 3;    // 黄钻等级,非黄钻为0  
+    required string  sign        = 4;    // 签名
+    required uint32  svr_id      = 5;    // 用户所选登录服务器ID
+    optional uint32  effect_time = 6;    // 有效期
+    optional string  pf          = 7;    // 平台（如91,UC等）
+    optional uint32  platform_id = 8[default = 0];    // 平台来源ID
+    
+	optional string sid          = 9 ; // 服域名唯一标识符
+	optional string did          = 10; // 设备唯一性ID
+	optional string channel_id   = 11; // 渠道ID，广告投放打包时用到
+	optional string app_version  = 12; // 获取应用的版本号
+	optional string app_type     = 13; // (iphone、ipad、android)
+	optional string device       = 14; // 获取的设备的机型
+	optional string nm           = 15; // 联网方式如：wifi
+	optional string mno          = 16; // 获取设备的运营商 如：移动
+	optional string screen       = 17; // 设备的屏幕分辨率
+	optional string os           = 18; // 操作系统
+	optional string mac          = 19; // ios的MAC地址,不带:号
+
+    optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+enum AUTH_RET_E{
+    ARE_SUCCESS    = 1;
+    ARE_LOCKED     = 2;    // 被锁定
+    ARE_WALLOW     = 3;    // 防沉迷
+    ARE_NOPASS     = 4;    // 错误的登录密码
+    ARE_SYSTEM_ERR = 5;    // 系统其它错误
+}
+
+message auth_rsp {
+    required uint32     user_id   = 1;   // 用户ID
+    required AUTH_RET_E ret       = 2;   // 登录状态 
+    required uint32     svrtime   = 3;   // 游戏服务器时间 unix time
+    
+    repeated client.role_info_rsp role_info = 4; // 验证通过返回角色基础信息 
+}
+

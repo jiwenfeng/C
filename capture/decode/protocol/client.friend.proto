@@ -1,0 +1,143 @@
+import "client.comm.proto";
+package client;
+
+// 好友操作结果列表
+enum FRIEND_OPERATE_RET_E{
+    CFORE_SUCCESS = 0 ;  // 操作结果
+	CFORE_DENY_ADD = 1;  // 对方拒绝加好友
+	CRORE_FRIEND_NUM_LIMIT = 2; // 好友数目是否已达上限
+	CRORE_FRIEDN_OFFLINE = 3; // 对方已经下线
+    CRORE_BLACK_LIST_LIMIT = 4; // 你在对方的黑名单中
+	CRORE_ALREAD_FRIEND  = 5; // 已经是好友了
+	CFORE_SYS_ERR = 999; // 系统错误
+}
+
+// 获取本人好友列表
+message friend_list_req {
+    required uint32 time = 1; // 当前客户端拿到服务器的unixtime
+	
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+// 获取本人好友列表
+message temporary_friend_list_req {
+    required uint32 time = 1; // 当前客户端拿到服务器的unixtime
+	
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+// 本人好友信息
+message friend_info {
+	enum friend_type {
+		temporary_friend   = 1;// 临时好友
+		real_friend		   = 2;// 真正的好友
+		temporary_and_real = 3; //既是好友又是临时好友
+	}
+    required uint32             role_id       = 1;    // 角色ID
+	required friend_type        relation_type = 2; // 好友类型
+	optional uint32             degree        = 3[default = 0];    // 好友度 值为0xFFFFFFFF时是黑名单 0xFFFFFFFE 仇人
+	optional uint32             friend_level  = 4;// 好友的等级
+	optional string             friend_name   = 5;// 好友的名字
+    optional uint32             contact_time  = 6; // 最近联系时间
+	optional uint32				vip_level	  = 7; // VIP等级
+}
+
+enum FRIEND_LIST_RES_E{
+    FLRE_LIST = 1; // 好友列表整体更新
+    FLRE_ADD = 2; // 给列表增加好友
+	FLRE_DEL = 3; // 给列表删除好友
+	FLRE_CHA = 4; // 关系改变
+    FLRE_BLK = 5; // 黑名单
+}
+
+// 好友列表返回
+message friend_list_rsp {
+    required FRIEND_LIST_RES_E list_type = 1; // 好友列表更新方式
+    repeated friend_info fi = 2;  // 好友信息 
+}
+
+// 请求加好友
+message friend_add_req {
+    required uint32 role_id = 1; // 请求要加好友的角色ID
+
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+// 加好友结果
+message friend_add_rsp {
+    required FRIEND_OPERATE_RET_E ret = 1; // 请求加好友结果 
+	optional uint32 role_id = 2; // 请求要加好友的角色ID
+}
+
+// 我对别人请求加好友做出回复
+message friend_add_ret {
+    required uint32 role_id = 1; // 谁请求加我为好友
+	required bool allow = 2;     // 是否同意对方的请求
+
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+// 请求删除好友
+message friend_del_req {
+    repeated uint32 role_id = 1; // 请求删除好友的角色ID集合
+
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+// 好友上下线通知
+message friend_on_off_notify{
+    required uint32 role_id = 1; // 角色ID
+	required bool   online = 2;  // true为在线,其它为下线通知
+}
+
+// 设为黑名单
+message friend_blk_req {
+    repeated uint32      role_id  = 1;
+    optional server_head svr_head = 1000;
+}
+
+// 查询是否在线请求
+message friend_status_req {
+    repeated uint32      role_id  = 1;
+    optional server_head svr_head = 1000;
+}
+
+message friend_status_info {
+    required uint32 role_id = 1;
+    required uint32 info    = 2; // 0 不在线 1 在线
+}
+
+// 查询是否在线回复
+message friend_status_rsp {
+    repeated friend_status_info fsi = 1;
+}
+
+// 好友推荐
+message friend_recommend_req {
+    required uint32      unixtime = 1;
+    optional server_head svr_head = 1000;
+}
+
+message friend_recommend_rsp {
+    repeated uint32 role_id = 1;
+}
+
+// 好友亲密度增加消息
+message friend_degree_msg {
+    required uint32 friend_role_id = 1; // 好友的角色ID
+	required uint32 degree_val = 2;     // 增加了多少亲密度
+}
+
+message friend_degree_add {
+    required uint32 role_id = 1;        
+	required uint32 friend_role_id = 2; // 好友的角色ID
+	required uint32 degree_val = 3;     // 增加了多少亲密度
+}
+
+message attention_role_list_req {
+    required uint32      unixtime = 1;
+    optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+message private_friend_rsp{
+	required uint32 result_type = 1; // 0 对方不在线 1在线
+}

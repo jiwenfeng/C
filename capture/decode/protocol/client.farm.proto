@@ -1,0 +1,261 @@
+import "client.comm.proto";
+package client;
+
+// 仙园的操作类型
+enum FARM_OPERATE_TYPE_E {
+    FOTE_NULL   = 0; // 日志记录
+    FOTE_CREATE = 1; // 创建仙园
+	FOTE_SOW    = 2; // 种植作物
+	FOTE_ENTER  = 3; // 进入仙园
+	FOTE_STEAL  = 4; // 偷窃别人的作物
+	FOTE_IMPROVE = 5; // 提速作物成熟
+	FOTE_GAIN    = 6; // 收获作物
+}
+
+// 仙园的一些声明约定
+enum FARM_PARAM_E {
+    FPE_MAX_FARM_LAND_NUM = 18; // 每个仙园最大有18块
+}
+
+// 仙园操作结果
+enum FARM_OPERATE_E{
+    FOE_SUCCESS = 0;        // 操作成功
+	FOE_NO_FARM = 1;        // 您还没有仙园,暂时不能操作
+	FOE_NO_ENTER_TIMES = 2; // 没有进入他人仙园的次数了
+	FOE_NO_STEAL_TIMES = 3; // 没有偷取别人的次数了
+	FOE_CANT_STEAL     = 4; // 该作物无法窃取了,可能是被偷的次数过多
+	FOE_NO_MATURE      = 5; // 该作物还未成熟,暂时不能摘取
+	FOE_NO_SEED        = 6; // 没有该作物的种子,无法种植
+	FOE_SEED_LEVEL_LIMIT = 7; // 未达到种该作物种子的等级要求
+	FOE_STEAL_FAILED    = 8;  // 运气不佳,偷窃失败并跌落金币
+	FOE_NOT_BELONG      = 10; // 这个仙园不属于您,无法收获
+	FOE_NO_LCHOR        = 11; // 没有灵液,无法加速作物
+	FOE_STEAL_KILLED    = 12; // 偷窃时被打死
+	FOE_STEALED         = 13; // 该作物您已经偷窃过,无法再行偷窃
+	FOE_STEAL_NUM_LIMIT = 14; // 该作物已经所剩无己，无法再被偷取
+	FOE_ENTER_TIME_LIMIT = 15; // 冷却时间不足,无法进入别人的仙园
+	FOE_LEVEL_LIMIT      = 16; // 角色等级不足,无法进行仙园操作
+	FOE_SOW_NUM_LIMIT    = 17; // 超过了当前仙园等级所能种植作物的最大限制
+	FOE_SYS_ERROR        = 18; // 系统错误
+	FOE_CANT_STEAL_SELF  = 19; // 不能在自己的仙园内进行摘取
+	FOE_NOT_EXIST_FARM   = 20; // 该仙园土地不存在
+	FOE_MONEY_TIMELIMIT  = 21; // 摇钱树必须在距离上次摇钱24小时后才可获取
+	FOE_MONEY_LIMIT      = 22; // 没有足够的铜钱或者元宝
+};
+
+// 仙园作物状态
+enum FARM_CROP_STATUS_E{
+    FCSE_NULL   = 0;   // 没有任何阶段
+    FCSE_SEED   = 1;   // 种子阶段
+	FCSE_GROWUP = 2;   // 成长阶段
+	FCSE_MATURE = 3;   // 成熟可摘阶段
+}
+
+// 每块土地信息
+message farm_land_info {
+    required uint32 land_id            = 1[default=0]; // 土地的编号,从0-17对应18块土地
+	required uint32 serial             = 2[default=0]; // 所种的作物编号，如果没有种植，则为0
+	optional uint32 sow_time           = 3[default=0]; // 种植时间
+    optional FARM_CROP_STATUS_E status = 4[default=FCSE_NULL]; // 作物的状态 
+    optional uint32 countdown          = 5[default=0];	// 作为距离下一阶段倒计时,单位为秒
+	optional uint32 total_fruit_num    = 6[default=0]; // 该作为总计产生的果实数
+	optional uint32 steal_fruit_num    = 7[default=0]; // 被偷的果实数,  total_fruit_num-steal_fruit_num即为现在可收获果实数目
+	repeated uint32 steal_role_id      = 8; // 曾经偷窃过这块土地的角色ID
+}
+
+// 仙奴信息
+message farm_slave_info {
+    required uint32 role_id = 1; // 角色ID
+	required uint32 time_end = 2; // 该仙奴的到期日期
+}
+
+// 整个仙园的详细信息
+message farm_info {
+    required uint32 role_id         	= 1[default=0];    // 园主
+    required uint32 level   			= 2[default=0];    // 等级
+	required uint32 score     			= 3[default=0];    // 当前仙园升级的上限
+	required uint32 total_score   		= 4[default=0];    // 总积分
+	required uint32 money_tree_times 	= 5[default=0]; 	// 上次收获摇钱树的时间
+	repeated farm_land_info fli 		= 6; 	// 土地信息
+	optional farm_slave_info  fsi  		= 7; 	// 仙奴的信息
+}
+
+// 通知场景和客户端有仙园的信息更新
+message update_farm_info {
+    required bool is_create = 1[default=false]; // 服务端场景用到标识，客户端不需要关心
+	required farm_info fi   = 2;                // 更新的仙园信息
+}
+
+// 请求获取仙园信息
+message farm_info_req {
+    required uint32 svr_time = 1; 
+    
+    optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 	
+}
+
+// 仙园信息返回，包括了自己和可查看其它玩家的仙园信息
+message farm_info_rsp {
+    required FARM_OPERATE_E ret = 1; // 操作结果
+    repeated farm_info fis = 2; // 仙园信息,客户端对照role_id来判断是否自己的仙信息
+}
+
+// 仙园记录
+message farm_record {
+	required uint32 time = 1; // 发生时间
+	required FARM_OPERATE_TYPE_E type = 2; // 操作类型
+	optional uint32 role_id = 3; // 如果被偷,即为偷盗者角色ID 如果被提速,即为提速者ID
+	optional uint32 num     = 4; // 如果被偷,则为被偷窃的数目,如果被提速,则为提速时增加的产量数目
+	optional uint32 times   = 5; // 如果被提速,则为提速时减少的秒数
+	optional uint32 serial  = 6; // 作物的编号ID
+}
+
+// 请示获取自己的仙园记录信息
+message farm_record_req {
+    required uint32 svr_time = 1; 
+    
+    optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+// 仙园的记录信息返回
+message farm_record_rsp {
+    repeated farm_record frs = 1; // 自己仙园的详细记录
+}
+
+// 玩家达到40级,可以请求创建仙园
+message farm_create_req {
+    required bool advanced =1; // 是否要花费100元宝,创建2级仙园
+	
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+// 创建仙园结果
+message farm_create_rsp {
+    required FARM_OPERATE_E ret = 1; // 操作结果
+	optional farm_info fi = 2;       // 创建好的仙园信息
+}
+
+// 请求进入别人的仙园
+message farm_enter_req {
+    required uint32 role_id = 1[default=0]; // 请求进入的园主ID,如果是进入自己的仙园,那么填写0
+	
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 	
+}
+
+// 进入别人的仙园的结果
+message farm_enter_rsp {
+    required FARM_OPERATE_E ret = 1; // 操作结果
+}
+
+// 有其它玩家闯入自己仙园的通知 
+message farm_entered_msg {
+    required uint32 role_id = 1; // 谁闯进了我的仙园
+	optional uint32 farmer_id = 2[default=0]; // 园主
+}
+
+// 请求播种
+message farm_sow_req {
+    required uint32 land_id = 1; // 土地ID
+	required uint32 serial  = 2; // 所种的作物编号
+	
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+// 播种结果
+message farm_sow_rsp {
+    required FARM_OPERATE_E ret = 1; // 操作结果
+	optional farm_land_info fli = 2; // 播种土地的详细信息,如果播种成功的条件下
+}
+
+// 请求偷窃
+message farm_steal_req {
+    required uint32 land_id = 1; // 请示偷取当前所在仙园的土地ID
+	
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+message farm_steal_msg {
+    required farm_steal_req req = 1;
+	required uint32   farm_role_id = 2;
+}
+
+message farm_stolen_msg {
+    required uint32 farm_role_id = 1;
+	required uint32 thief_role_id = 2;
+	required uint32 steal_goods_id = 3;
+	required uint32 steal_num = 4;
+}
+
+// 偷窃结果
+message farm_steal_rsp {
+    required FARM_OPERATE_E ret = 1; // 操作结果
+	optional uint32 lose_money  = 2; // 因为偷窃失败,运气不佳或者被打死,掉落的金币数
+}
+
+// 请求收获仙园
+message farm_gain_req {
+    repeated uint32 land_id = 1; // 请求收获的土地ID,支持客户端填写收获所有的土地上的作物
+
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+// 收获仙园结果
+message farm_gain_rsp {
+    required FARM_OPERATE_E ret = 1; // 操作结果
+	optional uint32 add_score = 2;   // 增加的积分
+}
+
+message farm_gain_unit{
+    required uint32 goods_id = 1;
+	required uint32 goods_num = 2;
+}
+
+message farm_gain_msg {
+    required uint32 farm_role_id = 1;
+	repeated farm_gain_unit fgus = 2;
+}
+
+// 使用提速的类型
+enum FARM_IMPROVE_TYPE_E{
+    FITE_ONE_HOUR  = 1; // 提速1小时
+	FITE_TWO_HOUR  = 2; // 提速2小时
+	FITE_FIVE_HOUR = 3; // 提速5小时
+}
+
+// 请求给某块地使用灵液加速 
+message farm_improve_req {
+    required uint32 role_id = 1; // 请求加速的角色ID,如果是给自己仙园的作物提速,那么填写0即可
+    required uint32 land_id = 2; // 请求加速的土地ID
+	required FARM_IMPROVE_TYPE_E type = 3; // 请求加速的类型
+
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+// 灵液加速结果,如果A帮助B加速,则该消息即返回给A也会通知B
+message farm_improve_rsp {
+    required FARM_OPERATE_E ret = 1; // 操作结果
+	optional uint32 improve_role_id = 2; // 实施加速的角色ID
+	optional farm_land_info fli = 3; // 加速土地的详细信息,如果在加速成功的前提下,有可能会增加作物的产量
+}
+
+// 用来通知当前进入的是谁的谁的仙园
+message farmer_role_msg{
+    required uint32 role_id = 1[default=0]; // 园主的角色ID
+}
+
+// 获取摇钱树上的绑定元宝
+message farm_gain_money_req{
+    required uint32 svr_time = 1; 
+
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+// 获取摇钱树结果
+message farm_gain_money_rsp {
+    required FARM_OPERATE_E ret = 1; // 操作结果
+	optional uint32         money = 2; // 绑定元宝数目
+	optional uint32         role_id = 3; // 摇钱树的主人
+}
+
+
+
+

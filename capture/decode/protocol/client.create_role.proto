@@ -1,0 +1,34 @@
+import "client.comm.proto";
+package client;
+
+message create_role_req{
+    required uint32  sex     = 1;   // 1 为男 2为女
+    required uint32 prof     = 2;   // 职业
+    required string name     = 3;   // 角色名
+    
+    optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+enum CREATE_ROLE_RET_E
+{
+    CRRE_SUCCESS       = 0; //创号成功
+    CREE_NICK_NAME_ERR = 1; //重名
+}
+
+message role_info_rsp{
+    required uint32 role_id        = 1;                         // 角色id,为0表示角色信息失效
+    required uint32 sex            = 2;                         // 1 为男 2为女
+    required uint32 prof           = 3;                         // 职业
+    required string name           = 4;                         // 角色名 
+    optional CREATE_ROLE_RET_E ret = 5[default = CRRE_SUCCESS]; // 创号结果， 
+    required uint32 level          = 6;                         // 等级
+    required uint32 fighting_power = 7;                         // 战斗力
+}
+
+message create_role_check_msg{
+    required create_role_req crr  = 1;
+    optional bool            pass = 2[default = false];
+}
+
+
+

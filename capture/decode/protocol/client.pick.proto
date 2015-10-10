@@ -1,0 +1,45 @@
+import "client.comm.proto";
+package client;
+
+enum PICK_ACTION_E
+{
+    PAE_ADD    = 1;  // 开始采摘
+	PAE_COMMIT = 2;  // 结束采摘
+}
+
+enum PICK_RET_E
+{
+    PIRE_SUCCESS         = 0;  // 成功
+	PIRE_PARAMETER_ERROR = 1;  // 参数错误
+	PIRE_TYPE_NOT_EXIST  = 2;  // 目标类型不存在
+	PIRE_TIME            = 3;  // 时间未到或者超时
+	PIRE_RANGE           = 4;  // 不在采集物范围内
+	PIRE_NOT_ADD         = 5;  // 采集未获得
+	PIRE_EFFECT          = 6;  // 采集无效果
+	PIRE_REPEAT          = 7;  // 重复的同一采集请求
+	PIRE_CANCLE          = 8;  // 采集被打断或者主动中断
+	PIRE_OFFICIAL_LIMIT	 = 9;  // 军团职位限制
+	PIRE_MONEY_LIMIT	 = 10; // 钱不足
+	PIRE_ACT_CLOSE		 = 11; // 活动未开启
+	PIRE_TARGET_IS_MINE	 = 12; // 已是占领军团
+	PIRE_IN_CD			 = 13; // 冷却时间未到
+	PIRE_ALLIANCE		 = 14; // 同盟军团
+}
+
+message pick_info {
+	required PICK_ACTION_E action = 1;					// 采集行为
+	optional role_data rd  = 2;							// 被采集物
+}
+
+message pick_req {
+    required pick_info pi = 1;						   // 采集信息  
+    optional server_head svr_head = 1000;
+}
+
+message pick_rsp {
+	required uint64 inst_id = 1;
+	required uint32 role_id = 2;
+	required PICK_ACTION_E action = 3;
+	required PICK_RET_E    ret = 4;
+}
+

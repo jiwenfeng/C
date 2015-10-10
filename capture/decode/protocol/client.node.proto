@@ -1,0 +1,14 @@
+import "client.comm.proto";
+
+package client;
+
+message agent_ready {
+	required uint32		 unixtime = 1;
+	optional server_head svr_head = 1000;
+}
+
+message user_data {
+	required bytes  db            = 1;
+	required uint32 scene_id      = 2;
+	optional server_head svr_head = 1000;
+}

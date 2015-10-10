@@ -1,0 +1,21 @@
+import "client.comm.proto";
+package client;
+
+message randnpc_postion{
+    required int32 x = 1[default=0];
+	required int32 y = 2[default=0];
+	required int32 z = 3[default=0];
+}
+
+message randnpc{
+    required uint32 role_id = 1[default=0];
+	required uint32 map_id = 2[default=0];
+	required uint32 scene_id = 3[default=0];
+	required randnpc_postion born_pos = 4;
+	repeated randnpc_postion path_rule = 5;
+}
+
+message randnpc_set{
+    repeated randnpc rn = 1;
+}
+

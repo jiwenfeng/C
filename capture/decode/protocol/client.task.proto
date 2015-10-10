@@ -1,0 +1,138 @@
+import "client.comm.proto";
+package client;
+
+// 操作当前单人副本
+message ctrl_scene_req {
+    enum ctrl_type {
+        suspend  = 1;    
+        resume   = 2;
+    }
+    required ctrl_type   type     = 1;
+    optional uint32      unixtime = 2;   // 挂起时间 最大300秒
+    optional server_head svr_head = 1000;
+}
+
+message ctrl_scene_rsp {
+    required uint32         ret = 1; // 0正常 非0失败
+    required ctrl_scene_req req = 2;
+}
+
+message task_talk {
+    required uint32 npc_id = 1;
+}
+
+message task_raid {
+    required uint32 raid_id = 1;
+    required uint32 count   = 2;
+}
+
+message task_pick {
+    required uint32 id    = 1;
+    required uint32 count = 2;
+}
+
+message task_kill {
+    required uint32 id    = 1;
+    required uint32 count = 2;
+}
+
+message task_guard {
+    required uint32 id = 1;
+}
+
+message task_level {
+    required uint32 level = 1;
+}
+
+message task_event {
+    required uint32 id = 1;
+}
+
+message task_progress {
+    repeated task_talk  talk  = 1;
+    repeated task_raid  raid  = 2;
+    repeated task_pick  pick  = 3;
+    repeated task_kill  kill  = 4;
+    repeated task_guard guard = 5;
+    repeated task_level level = 6;
+    repeated task_event event = 7;
+}
+
+message task_accepted {
+    required uint32        task_id  = 1[default = 0];
+    required task_progress progress = 2;              // 进度
+}
+
+message task_completed {
+    required uint32 task_id = 1[default = 0];
+    required uint32 count   = 2[default = 0]; // 完成次数
+    required uint32 time    = 3[default = 0]; // 完成时间
+}
+
+// 任务数据变更通知
+message task_msg {
+    enum type {
+        insert = 1;
+        remove = 2;
+        update = 3;
+    }
+    required type           t         = 1;
+    repeated task_accepted  accepted  = 2;
+    repeated task_completed completed = 3;
+	optional uint32		 task_flag		 = 4;
+}
+
+enum TASK_RESULT {
+    TR_SUCCESS         = 0; // 完成
+    
+    TR_LIMIT_CONDITION = 1; // 条件限制
+    TR_LIMIT_ACCEPETD  = 2; // 已领取过
+    TR_LIMIT_NPC       = 3; // NPC限制
+    
+    TR_TASK_ERROR      = 4; // 任务ID错误
+}
+
+// 领取任务请求
+message accept_task_req {
+    required uint32      task_id  = 1;    // 任务ID
+    optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+// 领取任务结果
+message accept_task_rsp {
+    required TASK_RESULT ret     = 1;
+    required uint32      task_id = 2;
+}
+
+// 提交任务请求
+message submit_task_req {
+    required uint32      task_id         = 1;
+    repeated uint32      chose_reward_id = 2;     // 提交任务时, 若奖励物品多选, 这里填索引(注意:物品选择时,若没传值,则一个物品都不送)
+	optional uint32		 task_flag = 3;
+    optional server_head svr_head        = 1000;  // 服务端填写项, 客户端不需要关心也不必填写数据 
+}
+
+// 提交任务结果
+message submit_task_rsp {
+    required TASK_RESULT ret     = 1;
+    required uint32      task_id = 2;
+}
+
+// 与指定NPC对话请求
+message talk_task_req {
+    required uint32      task_id  = 1;
+    required uint32      npc_id   = 2;    // 被谈话的NPC ID
+    optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+// 与指定NPC对话返回
+message talk_task_rsp {
+    required TASK_RESULT ret     = 1;
+    required uint32      task_id = 2;
+}
+
+// 剧情
+message story_end_req {
+    required uint32      id       = 1;
+    optional server_head svr_head = 1000;
+}

@@ -1,0 +1,102 @@
+import "client.comm.proto";
+import "client.role_attr_msg.proto";
+import "client.role_skill_msg.proto";
+
+package client;
+
+message mounts_info {
+    required uint32    mount_id          = 1; // 拥用的坐骑ID
+    required uint32    advance_time      = 2; // 上次进阶时间
+    required uint32    advance_bless     = 3; // 祝福值
+    required uint32    skill_upgrade_num = 4; // 技能升级次数
+	required uint32	   mount_level		 = 5; // 坐骑等级
+	required uint32    mount_exp		 = 6; // 坐骑经验
+	optional uint32    mount_power       = 7; // 坐骑战斗力
+    optional role_data rd      	         = 8; // 没有就是自己的
+    optional role_attr attr    	         = 9; // 坐骑属性 如果没有附加可以直接读配置里的属性
+}
+
+message mounts_msg {
+    repeated mounts_info mi = 1;
+}
+
+// 坐骑升级返回
+message mounts_level_rsp {
+	repeated mounts_info mi = 1;
+}
+
+message receive_mounts_req {
+    required uint32      unixtime = 1;
+    optional server_head svr_head = 1000;
+}
+
+message receive_mounts_rsp {
+    enum result {
+        success    = 0; // 成功
+        lvl_limit  = 1; // 等级不足
+        raid_limit = 2; // 指定副本没有通关
+        once_limit = 3; // 只能领取一次
+    }
+  
+    required result ret      = 1;
+    optional uint32 mount_id = 2;
+}
+
+message ride_mounts_req {
+    required uint32      index    = 1;
+    optional server_head svr_head = 1000;
+}
+
+message ride_mounts_rsp {
+    required uint32 ret   = 1;
+    optional uint32 index = 2;
+}
+// 坐骑进阶
+message upgrade_mounts_req {
+    required uint32      index    = 1;
+    optional server_head svr_head = 1000;
+}
+
+message upgrade_mounts_rsp {
+    required uint32 ret			= 1;
+	repeated mounts_info mi		= 2;
+    optional uint32 index		= 3;
+}
+
+message upgrade_mounts_skill_req {
+    required uint32       upgrade_type  = 1 [default = 0];// 0 普通 1 幸运 2 一键幸运
+    optional server_head svr_head       = 1000;
+}
+
+message upgrade_mounts_skill_rsp {
+    enum result {
+        success_add_exp      = 0;  // 经验加成成功
+		success_level_up     = 1;  // 升级成功
+        count_limit          = 2;  // 次数不足
+        money_limit          = 3;  // 金钱不足
+        skill_error          = 4;  // 技能错误
+        max_level            = 5;  // 最大等级
+        level_limit          = 6;  // 坐骑等级限制
+    }
+    required result     ret        = 1;
+	required uint32  upgrade_type  = 2;
+	repeated uint32  skill_id      = 3;
+	required uint32  upgrade_num = 4; // 技能升级次数    
+}
+// 坐骑升级
+message upgrade_mounts_level_req {
+	required uint32		 mount_id		= 1	  ;
+	optional server_head svr_head       = 1000;
+}
+
+// 坐骑时间请求
+message mounts_bless_time_req
+{
+	required uint32 unixtime = 1;
+	optional server_head svr_head = 1000;
+}
+
+message mounts_bless_time_rsp 
+{
+	required uint32 remain_time = 1;
+}

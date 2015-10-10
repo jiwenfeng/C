@@ -1,0 +1,94 @@
+import "client.comm.proto";
+import "client.raid_operate.proto";
+
+package client;
+
+// 关卡的最快通关信息
+message devil_info_req
+{
+	required uint32 id = 1; 
+	optional server_head svr_head = 1000;
+}
+
+message devil_info_rsp
+{
+	required uint32 id = 1;
+	optional string name = 2;
+	optional uint32 tick = 3;
+}
+
+message devil_raid_detail
+{
+	required uint32 raid_id		= 1;
+	required uint32 star		= 2;
+	required uint32 tick		= 3; // 我的最快时间
+	required uint32 champion	= 4; // (0 未获得最快 1 已获得)
+	required uint32 reward_type = 5; // 奖励类型(0首杀 1再杀 2无)
+}
+
+// 魔化神将关卡列表
+message devil_stage_list
+{
+	repeated devil_raid_detail	drd = 1;	//
+	repeated devil_stage_info	dsi = 2;
+}
+
+// 领取完美礼包
+message devil_award_req
+{
+	required uint32 id = 1;			// 难度
+	optional server_head svr_head = 1000;
+}
+
+message devil_award_rsp
+{
+	required uint32 ret = 1; // 0 成功 1 失败
+	required uint32 id = 2;
+}
+
+message devil_stage_info
+{
+	required uint32 id = 1;			// 
+	required uint32 state = 2;		// 奖励是否领取(0 否 1 是)
+}
+
+/* 以下服务器用 */
+message devil_raid_info
+{
+	required uint32 raid_id = 1;	// 关卡ID
+	required uint32 star = 2;		// 星星数量
+	required uint32 tick = 3;		// 通关时间
+	required uint32 champion = 4;	// 是否最快
+	required uint32 time = 5;		// 
+}
+
+message devil_center_info
+{
+	required uint32 raid_id = 1;	// 关卡ID
+	required uint32 role_id = 2;
+	required uint32 tick = 3;
+}
+
+message devil_fight_over
+{
+	required uint32 role_id		 = 1;
+	required uint32 raid_id		 = 2;
+	required uint32 tick		 = 3;
+	required uint32 star		 = 4;
+	required bool	champion	 = 5;
+    optional raid_success_info success = 6;
+    optional raid_failure_info failure = 7;
+}
+
+message devil_fight_result
+{
+	required uint32 role_id = 1;
+	required uint32 raid_id = 2;
+	required uint32 used_tick = 3;
+	required uint32 star = 4;
+	required uint32	champion = 5;
+    optional raid_success_info success = 6;
+    optional raid_failure_info failure = 7;
+	optional string role_name = 8;
+	optional uint32 tick = 9;
+}

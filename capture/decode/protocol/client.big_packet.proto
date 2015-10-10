@@ -1,0 +1,9 @@
+import "client.comm.proto";
+package client;
+
+message big_packet {
+	required string packs = 1;
+	
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+

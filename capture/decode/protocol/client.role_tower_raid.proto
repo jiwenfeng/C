@@ -1,0 +1,62 @@
+import "client.comm.proto";
+package client;
+
+// 个人塔信息放人物属性里
+// 爬塔排行前5位放入到排行榜协议中
+
+// 塔层信息请求
+message tower_info_req {
+    required uint32      raid_id  = 1;    // 副本id
+    optional server_head svr_head = 1000;
+}
+
+// 塔层信息回复
+message tower_info_rsp {
+    required uint32 raid_id = 1;
+    required uint32 role_id = 2;
+    required uint32 time    = 3;
+}
+
+// 挑战塔请求
+message tower_challenge_req {
+    required uint32      raid_id  = 1;    // 副本id
+
+    optional server_head svr_head = 1000;
+}
+
+// 主动离开爬塔
+message tower_leave_req {
+    required uint32 svr_time = 1; // 服务器unix时间
+	optional server_head svr_head = 1000; 
+}
+
+// 离开爬塔副本通知
+message tower_leave_notify {
+    required uint32  lvl = 1; // 本次爬到的层数
+	required bool    req_leave = 2; // 是否需要客户端主动发起离开信息,如果是时间到\或者通关,服务端主动下发此消息,需要客户端自动发起一次tower_leave_req
+}
+
+// 自动扫荡请求
+message tower_auto_req {
+    required uint32      lvl  = 1;     // 扫荡层数,服务端会判断不能大于自己手动爬的最大层数
+    optional server_head svr_head = 1000;
+}
+
+// 物品
+message tower_goods_info {
+    required uint32 goods_id = 1;
+    required uint32 num      = 2;
+}
+
+// 自动扫荡单层回复
+message tower_auto_lvl_rsp {
+    required uint32           lvl   = 1;  // 当前层
+    required uint32           exp   = 2;  // 本层经验
+    repeated tower_goods_info tgi   = 3;  // 掉落与奖历物品
+}
+
+message raid_info_update {
+    required uint32 raid_id = 1;
+    required uint32 time    = 2;
+    required uint32 role_id = 3;
+}

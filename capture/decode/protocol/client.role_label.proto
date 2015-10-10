@@ -1,0 +1,99 @@
+import "client.comm.proto";
+package client;
+
+// 称号列表请求
+message label_list_req {
+    required uint32      unixtime = 1;
+    optional server_head svr_head = 1000;
+}
+
+// 称号信息
+message label_info {
+    required uint32 label_code      = 1; // 称号id
+    required uint32 use_state       = 2; // 使用状态: 1 正在使用; 0 未使用
+    required uint32 effective_state = 3; // 效果状态: 1 有效; 0 无效
+    required uint32 end_date        = 4; // 称号失效时间: unixtime 失效时间; 0 一直有效
+}
+
+// 称号列表回复
+message label_list_rsp {
+    repeated label_info li = 1;
+}
+
+// 称号操作请求
+message operate_label_req {
+    enum OPERATE_TYPE {
+        ADD     = 0; // 使用
+        REMOVE  = 1; // 移除
+        REPLACE = 2; // 替换
+    }
+    
+    required uint32       label_code = 1;    // 称号ID
+    required OPERATE_TYPE type       = 2;    // 操作类型
+    optional server_head  svr_head   = 1000;
+}
+
+// 称号操作回复
+message operate_label_rsp {
+    enum OPERATE_TYPE {
+        ADD     = 0; // 使用
+        REMOVE  = 1; // 移除
+        REPLACE = 2; // 替换
+    }
+
+    enum OPERATE_RESULT {
+        SUCCESS  = 0; // 成功
+        FAILURE  = 1; // 失败
+    }
+
+    required uint32         lobel_code = 1; // 称号ID
+    required OPERATE_TYPE   type       = 2; // 操作类型
+    required OPERATE_RESULT result     = 3; // 操作结果 
+}
+
+// 获取指定用户当前称号
+message get_role_label_info_req {
+    repeated uint32      role_id  = 1;
+    optional server_head svr_head = 1000;
+}
+
+message get_role_label_info_rsp {
+    required uint32     role_id = 1;
+    repeated label_info li      = 2;
+}
+
+// 荣誉称号列表请求
+message honor_label_list_req {
+    required uint32      unixtime = 1;
+    optional server_head svr_head = 1000;
+}
+
+// 称号信息
+message honor_label_info {
+    required uint32 label_code      = 1; // 称号id
+    required uint32 role_id         = 2; // 称号归属玩家id
+}
+
+// 称号列表回复
+message honor_label_list_rsp {
+    repeated honor_label_info li = 1;
+}
+
+////// 内部接口 /////////
+
+message set_role_label {
+    required uint32 type       = 1; // 0 删除 1 增加
+    required uint32 role_id    = 2; // 
+    required uint32 label_code = 3; //
+    required uint32 end_date   = 4; // 称号失效时间: unixtime 失效时间; 0 一直有效
+}
+
+message use_honor_label {
+    required uint32 role_id    = 1;
+    required uint32 label_code = 2;
+}
+
+message use_honor_label_ret {
+    required uint32 role_id = 1;
+    required uint32 ret     = 2; // 0 成功 1 失败
+}

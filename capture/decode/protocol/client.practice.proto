@@ -1,0 +1,81 @@
+import "client.comm.proto";
+package client;
+
+enum PRACTICE_RESULT_E
+{
+    PRE_SUCCESS = 0;          // 开始修炼成功，包括打坐与双修
+    PRE_OTHER_REFUSE = 1;     // 双修请求对方拒绝
+    PRE_OTHER_PRAED = 2;      // 对方已经在双修中
+    PRE_OTHER_LEAVE = 3;      // 对方不在场景中，无法双修
+    PRE_OTHER_CANNOT = 4;     // 对方无法进行修炼
+    PRE_DISTANCE_LIMIT = 5;   // 距离限制，无法进行双修
+    PRE_SELF_CANNOT  = 6;     // 自身不允许打座或双修
+    PRE_SYS_ERR = 7;          // 系统其它错误
+    PRE_STOP_SUCCESS = 8;     // 停止修炼
+}
+
+// 打座请求
+message practice_req {
+    required uint32      time     = 1;    // 填写下当前的unixtime 
+    optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+// 打座请求结果
+message practice_rsp {
+    required PRACTICE_RESULT_E ret = 1;
+}
+
+// 双修请求
+message comm_practice_req {
+    required role_data   dst_rd   = 1;    // 申请双修的对象
+    optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+// 双修请求结果
+message comm_practice_rsp {
+    required PRACTICE_RESULT_E ret = 1;
+}
+
+// 本场景内可双修用户信息请求
+message comm_practice_list_req {
+    required uint32 time          = 1; // 填写下当前的unixtime 
+    
+    optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+// 目前可双修人员信息
+message comm_practice_info {
+    required role_name      rn    = 1; // 个人信息
+    required uint32         level = 2; // 等级
+    required client_map_pos pos   = 3; // 坐标
+}
+
+// 双修列表回复
+message comm_practice_list_rsp {
+    repeated comm_practice_info cpi = 1; // 可双修人员列表
+}
+
+// 服务器下发双修邀请到被邀请人
+message comm_practice_invite {
+    required comm_practice_info cpi = 1; // 邀请人信息
+}
+
+// 双修邀请同意与否操作
+message comm_practice_invite_result {
+    required comm_practice_info cpi   = 1;    // 邀请人信息
+    required bool               agree = 2;    // 是否同意
+    
+    optional server_head svr_head     = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+// 设置为自动同意双修操作
+message auto_agree_comm_practice {
+    required bool        auto_agree = 1;    // 是否自动同意双修
+    optional bool        get        = 2;    // 是否查询自动同意双修状态
+    optional server_head svr_head   = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+message stop_comm_practice_req {
+    required uint32      unixtime = 1;
+    optional server_head svr_head = 1000;
+}

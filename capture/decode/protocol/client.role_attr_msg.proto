@@ -1,0 +1,261 @@
+import "client.comm.proto";
+import "client.role_status.proto";
+package client;
+
+message role_attr {
+    optional uint32 sex					= 1  [default = 0];  // 性别
+    optional uint32 profession				= 2  [default = 0];  // 职业
+    optional uint64 experience				= 3  [default = 0];  // 经验
+    optional uint32 level				= 4  [default = 0];  // 等级
+    optional uint32 tael				= 5  [default = 0];  // 铜钱
+    optional uint32 ingot				= 6  [default = 0];  // 元宝
+    optional uint32 gift_money				= 7  [default = 0];  // 礼金
+    optional uint32 is_suspended_account		= 8  [default = 0];  // 挂起
+    optional uint32 partner_id				= 9  [default = 0];  // 同伴ID
+    optional uint32 family_id				= 10 [default = 0];  // 家族ID
+    optional uint32 family_position			= 11 [default = 0];  // 家族职位
+    optional uint32 can_be_raised			= 12 [default = 0];  // 是否允许被复活
+    optional uint32 famiy_level				= 13 [default = 0];  // 军团等级
+    optional uint32 can_join_family			= 14 [default = 0];  // 是否允许加入公会
+    optional uint32 can_be_transmit			= 15 [default = 0];  // 是否允许被传送
+    optional uint32 pk_model				= 16 [default = 0];  // PK模式
+    optional uint32 pk_value				= 17 [default = 0];  // PK值
+    optional uint32 military_strategy			= 18 [default = 0];  // 韬略值
+    optional uint32 map_id				= 19 [default = 0];  // 所在地图ID
+    optional uint32 x_pos				= 20 [default = 0];  // 所在地图X坐标
+    optional uint32 y_pos				= 21 [default = 0];  // 所在地图Y坐标
+    optional uint32 siege_reputation			= 22 [default = 0];  // 城战声望
+    optional uint32 cross_svr_war_reputation		= 23 [default = 0];  // 跨服战声望
+    optional uint32 max_hp				= 24 [default = 0];  // 最大生命值
+    optional uint32 cur_hp				= 25 [default = 0];  // 当前生命值
+    optional uint32 absorb_hp				= 26 [default = 0];  // 吸收生命值
+    optional uint32 max_mp				= 27 [default = 0];  // 最大法力值
+    optional uint32 cur_mp				= 28 [default = 0];  // 当前法力值
+    optional uint32 absorb_mp				= 29 [default = 0];  // 吸收法力值
+    optional uint32 attack_min				= 30 [default = 0];  // 最小攻击力
+    optional uint32 attack_max				= 31 [default = 0];  // 最大攻击力
+    optional uint32 defense_min				= 32 [default = 0];  // 最小防御力
+    optional uint32 defense_max				= 33 [default = 0];  // 最大防御力
+    optional uint32 hit_point				= 34 [default = 0];  // 命中值
+    optional uint32 dodge				= 35 [default = 0];  // 闪避值
+    optional uint32 stability				= 36 [default = 0];  // 稳定值
+    optional uint32 recover				= 37 [default = 0];  // 恢复值
+    optional uint32 attack_speed			= 38 [default = 0];  // 攻击速度
+    optional uint32 frozen_addition_ratio		= 39 [default = 0];  // 附加冰冻机率
+    optional uint32 poisoning_addition_ratio		= 40 [default = 0];  // 附加中毒机率
+    optional uint32 palsy_addition_ratio		= 41 [default = 0];  // 附加麻痹机率
+    optional uint32 dizziness_addition_ratio		= 42 [default = 0];  // 附加眩晕机率
+    optional uint32 frozen_resistance_ratio		= 43 [default = 0];  // 抵抗冰冻机率
+    optional uint32 poisoning_resistance_ratio		= 44 [default = 0];  // 抵抗中毒机率
+    optional uint32 palsy_resistance_ratio		= 45 [default = 0];  // 抵抗麻痹机率
+    optional uint32 dizziness_resistance_ratio		= 46 [default = 0];  // 抵抗眩晕机率
+    optional uint32 output_hurt_promote_ratio		= 47 [default = 0];  // 增加输出伤害
+    optional uint32 suffer_hurt_reduce_ratio		= 48 [default = 0];  // 减少承受伤害
+    optional uint32 ignore_defense_ratio		= 49 [default = 0];  // 忽略防御机率
+    optional uint32 rebound_hurt_ratio			= 50 [default = 0];  // 复原伤害机率
+    optional uint32 exp_coefficient				        = 51 [default = 0]; //  玩家经验系数
+    optional uint32 move_speed				            = 52 [default = 0];  // 移动速度 
+    optional uint32 armor_id                            = 53 [default = 0];  // 衣服ID
+    optional uint32 weapon_id                           = 54 [default = 0];  // 武器ID
+    optional uint32 mounts_id                           = 55 [default = 0];  // 坐骑ID
+    optional uint32 backpack_size                       = 56 [default = 0];  // 背包大小
+    optional uint32 warehouse_size                      = 57 [default = 0];  // 仓库大小
+    optional uint32 physical_power                      = 58 [default = 0];  // 体力
+    optional uint32 fighting_power                      = 59 [default = 0];  // 战斗力
+    optional uint32 anger                               = 60 [default = 0];  // 怒气
+    optional uint32 create_time                         = 61 [default = 0];  // 创建时间
+    optional uint32 online_time                         = 62 [default = 0];  // 上线时间
+    optional uint32 offline_time                        = 63 [default = 0];  // 离线时间
+	optional uint32 update_time                         = 64 [default = 0];  // 更新时间
+	optional uint32 history_online                      = 65 [default = 0];  // 在线时间历史记录
+    optional uint32 melting                             = 66 [default = 0];  // 溶炼值
+    optional uint32 potential_share_max                 = 67 [default = 0];  // 总计可分享心法冲击波经验上限
+    optional uint32 potential_accumulation              = 68 [default = 0];  // 玩家累计已获得的心法冲击波分享经验总量
+    optional uint32 skill_point							= 69 [default = 0]; // 技能点
+    optional uint32 popularity							= 70 [default = 0]; // 威望（竞技场）
+    optional uint32 skill_point_time					= 71 [default = 0]; // 技能点时间记录
+    optional uint32 vip_level							= 72 [default = 0]; // VIP等级
+    optional uint32 team_id								= 73 [default = 0];
+    optional uint32 camp_id								= 74 [default = 0];
+    optional uint32 strategy							= 75 [default = 0]; // 谋略
+	optional uint32 store_weapon						= 76 [default = 0];
+	optional uint32 bow_id								= 77 [default = 0]; // 弓箭ID
+	optional uint32 bow_index						    = 78 [default = 0]; // 弓箭技能格子数
+	optional uint32 cavalry_index						= 79 [default = 0]; // 骑兵技能格子数
+	optional uint32 bow_speed						    = 80 [default = 0]; // 骑兵技能格子数
+	optional uint32 equip_power							= 81 [default = 0]; // 主人与美人的（装备历史最高战力值）
+    /*
+      optional uint32 max_life                     = 1[default = 0];         //(增加)血量上限
+      optional uint32 inc_life                     = 2[default = 0];         //(增加)血量上限%量(本命属性)
+      optional uint32 cur_life                     = 3[default = 0];         //当前血量
+      optional uint32 max_power                    = 4[default = 0];         //(增加)仙气上限
+      optional uint32 inc_power                    = 5[default = 0];         //(增加)仙气上限%量
+      optional uint32 cur_power                    = 6[default = 0];         //当前仙气值
+      optional uint32 max_wrath                    = 7[default = 0];         //怒气上限
+      optional uint32 cur_wrath                    = 8[default = 0];         //当前怒气
+      optional uint32 attack                       = 9[default = 0];         //攻击力
+      optional uint32 inc_attk                     = 10[default = 0];         //(增加)攻击上限%量
+      optional uint32 defense                      = 11[default = 0];         //防御
+      optional uint32 inc_defense                  = 12[default = 0];         //(增加)防御上限%量
+      optional uint32 hitpoint                     = 13[default = 0];         //命中值
+      optional uint32 dodge                        = 14[default = 0];         //闪避值
+      optional uint32 critical                     = 15[default = 0];         //暴击值
+      optional uint32 tougnen                      = 16[default = 0];         //韧性值
+      optional uint32 agisity                      = 17[default = 0];         //灵力值
+      optional uint32 return_harm_per              = 18[default = 0];         //反弹受到的n%物理伤害
+      optional uint32 return_harm_val              = 19[default = 0];         //受到伤害时反弹N点伤害
+      optional uint32 ignor                        = 20[default = 0];         //穿透值
+      optional uint32 dec_harm                     = 21[default = 0];         //受到物理伤害时减少N点
+      optional uint32 metal_attk                   = 22[default = 0];         //金属性攻击N点(五行攻击)
+      optional uint32 wood_attk                    = 23[default = 0];         //木属性攻击N点
+      optional uint32 water_attk                   = 24[default = 0];         //水属性攻击N点
+      optional uint32 fire_attk                    = 25[default = 0];         //火属性攻击N点
+      optional uint32 soil_attk                    = 26[default = 0];         //土属性攻击N点
+      optional uint32 metal_defense                = 27[default = 0];         //金属性抗性N点
+      optional uint32 wood_defense                 = 28[default = 0];         //木属性抗性N点
+      optional uint32 water_defense                = 29[default = 0];         //水属性抗性N点
+      optional uint32 fire_defense                 = 30[default = 0];         //火属性抗性N点
+      optional uint32 soil_defense                 = 31[default = 0];         //土属性抗性N点
+      optional uint32 metal_dec                    = 32[default = 0];         //金属性伤害减少N点
+      optional uint32 wood_dec                     = 33[default = 0];         //木属性伤害减少N点
+      optional uint32 water_dec                    = 34[default = 0];         //水属性伤害减少N点
+      optional uint32 fire_dec                     = 35[default = 0];         //火属性伤害减少N点
+      optional uint32 soil_dec                     = 36[default = 0];         //土属性伤害减少N点
+      optional uint32 metal_ignore                 = 37[default = 0];         //金属性穿透N点
+      optional uint32 wood_ignore                  = 38[default = 0];         //木属性穿透N点
+      optional uint32 water_ignore                 = 39[default = 0];         //水属性穿透N点
+      optional uint32 fire_ignore                  = 40[default = 0];         //火属性穿透N点
+      optional uint32 soil_ignore                  = 41[default = 0];         //土属性穿透N点
+      optional uint32 attk_speed                   = 42[default = 0];         //攻击速度N点
+      optional uint32 move_speed                   = 43[default = 0];         //移动速度N点
+      optional uint32 boold_recover                = 44[default = 0];         //气血恢复速度N点
+      optional uint32 power_recover                = 45[default = 0];         //仙气恢复速度N点
+      optional uint32 wrath_recover                = 46[default = 0];         //怒气回复速度N点
+      optional uint32 profession                   = 47[default = 0];         //职业
+      optional uint32 level                        = 48[default = 0];         //等级数
+      optional uint32 upgrade_exp                  = 49[default = 0];         //升级所需的经验
+      optional uint32 factor_exper                 = 50[default = 0];         //获取得经验系数
+      optional uint32 factor_tael                  = 51[default = 0];         //获取铜钱系数
+      optional uint32 factor_power                 = 52[default = 0];         //获取怒气系数
+      optional uint32 factor_force                 = 53[default = 0];         //获取真气系数
+      optional uint32 mind_sense_level             = 54[default = 0];         //受到治疗效果系数			
+      optional uint32 mind_sense_exp               = 55[default = 0];         //受到攻击增加伤害系数		
+      optional uint32 factor_be_metal              = 56[default = 0];         //受到金伤害系数 改为上次退出游戏时间		
+      optional uint32 factor_be_wood               = 57[default = 0];         //受到木伤害系数	改为翅膀Id	
+      optional uint32 factor_be_water              = 58[default = 0];         //受到水伤害系数 改为武器Id		
+      optional uint32 factor_be_fire               = 59[default = 0];         //受到火伤害系数	改为穴位神化总数	
+      optional uint32 factor_be_soil               = 60[default = 0];         //受到土伤害系数	改为本次登入游戏时间	
+      optional uint32 factor_to_attk               = 61[default = 0];         //造成攻击伤害系数	    
+      optional uint32 factor_to_metal              = 62[default = 0];         //造成金伤害系数		
+      optional uint32 factor_to_wood               = 63[default = 0];         //造成木伤害系数	改为受到攻击时减少伤害系数	
+      optional uint32 factor_to_water              = 64[default = 0];         //造成水伤害系数	改为仙帝称霸称号	
+      optional uint32 factor_to_fire               = 65[default = 0];         //造成火伤害系数	改为飞行器ID	
+      optional uint32 factor_to_soil               = 66[default = 0];         //造成土伤害系数	改为所属仙宗ID	
+      optional uint32 sex                          = 67[default = 0];         //性别
+      optional uint32 label                        = 68[default = 0];         //称号ID
+      optional uint32 title                        = 69[default = 0];         //官职ID
+      optional uint32 family                       = 70[default = 0];         //家族ID
+      optional uint32 mate_id                      = 71[default = 0];         //配偶ID
+      optional uint32 master_id                    = 72[default = 0];         //师傅ID 改为vip有效时间
+      optional uint32 tael                         = 73[default = 0];         //铜钱
+      optional uint32 sliver                       = 74[default = 0];         //绑定铜钱
+      optional uint32 ingot                        = 75[default = 0];         //元宝
+      optional uint32 infamy                       = 76[default = 0];         //恶名值
+      optional uint32 experience                   = 77[default = 0];         //经验值
+      optional uint32 lucky                        = 78[default = 0];         //幸运值
+      optional uint32 pvp_fame                     = 79[default = 0];         //野外pvp积分
+      optional uint32 max_engine                   = 80[default = 0];         //最大精力   改为当日可捐献数
+      optional uint32 cur_engine                   = 81[default = 0];         //当前精力值 改为当日已捐献数
+      optional uint32 max_force                    = 82[default = 0];         //最大真气
+      optional uint32 cur_force                    = 83[default = 0];         //当前真气值
+      optional uint32 exp_fame                     = 84[default = 0];         //绑定元宝
+      optional uint32 battle_fame                  = 85[default = 0];         //竞技声望 攻城战积分
+      optional uint32 raid_fame                    = 86[default = 0];         //副本声望
+      optional uint32 master_fame                  = 87[default = 0];         //师徒声望 改为总捐献数
+      optional uint32 family_fame                  = 88[default = 0];         //家族声望
+      optional uint32 group                        = 89[default = 0];         //阵营
+      optional uint32 soul_level                   = 90[default = 0];         //元神等级
+      optional uint32 spar                         = 91[default = 0];         //晶石 改为战场积分 
+      optional uint32 intaking_force               = 92[default = 0];         //每天吸取真气
+      optional uint32 intaking_time                = 93[default = 0];         //最后吸取真气时间
+      optional uint32 intaked_force                = 94[default = 0];         //每天被吸取真气
+      optional uint32 intaked_time                 = 95[default = 0];         //最后被吸取真气时间
+      optional uint32 exp_cache                    = 96[default = 0];         //经验池
+      optional uint32 vip_level                    = 97[default = 0];         //VIP等级
+      optional uint32 trans_count                  = 98[default = 0];         //免费传送次数 改为黄钻情况
+      optional uint32 backp_size                   = 99[default = 0];         //背包大小
+      optional uint32 depot_size                   = 100[default = 0];         //仓库大小
+      optional uint32 pet_slot                     = 101[default = 0];         //宠物槽大小
+      optional uint32 max_charge                   = 102[default = 0];         //挑战副本最高层数
+      optional uint32 charge_time                  = 103[default = 0];         //挑战副本时间
+      optional uint32 flower                       = 104[default = 0];         //鲜花值
+      optional uint32 glamor                       = 105[default = 0];         //魅力值
+      optional uint32 hot1                         = 106[default = 0];         //温泉互动1
+      optional uint32 hot2                         = 107[default = 0];         //温泉互动2
+      optional uint32 hot3                         = 108[default = 0];         //温泉互动3
+      optional uint32 hot_time                     = 109[default = 0];         //温泉上次刷新时间
+      optional uint32 doom_lvl                     = 110[default = 0];         //劫数等级
+      optional uint32 strength                     = 111[default = 0];         //战斗力
+      optional uint32 reserved                     = 112[default = 0];         //保留
+      optional uint32 plunder_reward               = 113[default = 0];         //每天获得劫镖奖励次数
+      optional uint32 plunder_time                 = 114[default = 0];         //最后获得劫镖奖励时间
+      optional uint32 guard_quality                = 115[default = 0];         //当前运镖的品质
+      optional uint32 free_guard_refresh_count     = 116[default = 0];         //免费刷镖次数
+      optional uint32 free_task_refresh_count      = 117[default = 0];         //免费刷任务次数
+      optional uint32 vitality                     = 118[default = 0];         //玩家活跃度 改为角色状态 0正常 1封号 2禁言
+      optional uint32 vitality_time                = 119[default = 0];         //活跃度时间 封禁时间 
+      optional uint32 equip_total                  = 120[default = 0];         //套装 120
+      optional uint32 equip_cost                   = 121[default = 0];         //付费套装效果
+      optional uint32 reputation                   = 122[default = 0];         //功勋
+      optional uint32 fashion_hide                 = 123[default = 0];         //时装隐藏
+    */
+}
+
+message role_msg {
+    optional role_data   rd       = 1;                  // 用户数据
+    optional role_attr   attr     = 2;                  // 角色的属性信息
+    optional role_status status   = 3;                  // 角色状态信息
+    optional bool        born     = 4[default = false]; // 是否新出生的角色
+    optional uint32      atk_mode = 5;                  // 0中立 1敌对 2友好 3保护 4不可选
+}
+
+message multi_role_msg {
+    repeated role_msg rm = 1;
+}
+
+// 游戏内查询是否黄钻
+message yellow_vip_info_req {
+    repeated uint32      role_id = 1;
+    optional server_head svr_head = 1000;
+}
+
+message yellow_vip_info {
+    required uint32 role_id = 1; // 
+    required uint32 lvl     = 2; // 等级
+    required bool   year    = 3; // 是否年费
+}
+
+message yellow_vip_info_rsp {
+    repeated yellow_vip_info yvi = 1;
+}
+
+
+// 角色单条属性改变通知
+message role_attr_change_msg {
+    required role_data rd   = 1; // 改变的玩家
+    required uint32    type = 2; // 改变的属性
+    required uint64    old  = 3; // 改变前的值
+    required uint64    now  = 4; // 改变后的值
+}
+
+// 恢复生命值通知
+message recover_hp_msg {
+    required role_data rd = 1;
+    required uint32    hp = 2;
+}
+
+// 更新属性
+message update_role_attr_msg {
+    repeated role_msg    rm       = 1;
+    optional server_head svr_head = 1000;
+}

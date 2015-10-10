@@ -1,0 +1,91 @@
+import "client.comm.proto";
+package client;
+
+// 角色统计请求
+message role_statis_req {
+    /*enum type {
+    PRSTE_DAY_ONCE_LIMIT        = 1,   // 每天一次性限制 0 没有记录 1 有记录  右起第一位每天数据是否初始化
+    PRSTE_USER_STATE            = 2,   // 各种状态 1扫荡
+    PRSTE_ENTER_RAID_COUNT      = 3,   // 0xFFFF0000征战精英副本今日挑战成功次数 0x0000FFFF征战普通副本今日挑战成功次数
+    PRSTE_AUTO_RAID_COUNT       = 4,   // 0xFFFF0000今日扫荡征战精英副本次数 0x0000FFFF今日扫荡征战普通副本次数
+    }
+
+      enum update_type {
+      PRSUTE_NOT_UPDATE = 0, // 一直累加不更新
+      PRSUTE_DAY_UPDATE = 1, // 按天更新统计项
+      PRSUTE_WEEK_UPDATE = 2, // 按周更新统计项
+      PRSUTE_MONTH_UPDATE = 3, // 按月更新统计项
+      }
+    */
+    
+    repeated uint32      type      = 1;
+    optional server_head svr_head  = 1000;
+}
+
+message role_statis_info {
+    required uint32      type        = 1; // 统计类型
+    required uint32      update_type = 2; // 更新类型
+    required uint32      val         = 3; // 次数
+    required uint32      last_time   = 4; // 更新时间
+}
+
+// 角色统计回复
+message role_statis_rsp {
+    repeated role_statis_info rsi = 1;
+}
+
+message day_info {
+	required uint32 day		 = 1; // 当前日期号数
+	required uint32 month    = 2; // 当前月份
+	required uint32 year     = 3; // 当前年份
+	required uint32 week_day = 4; // 当前星期几 1~7
+	required uint32 max_day  = 5; // 当前最大号数（28 or 29 or 30 or 31）
+}
+
+// 签到列表请求
+message sign_list_req {
+	required uint32 list_tye = 1;
+	optional server_head svr_head  = 1000;
+}
+
+// 签到列表请求返回
+message sign_list_rsp {
+	required uint32 sign_value = 1;
+	repeated day_info info     = 2;
+}
+
+// 签到请求
+message sign_in_req {
+	required uint32 sign_date      = 1   ; // 签到的号数
+	optional server_head svr_head  = 1000;
+}
+
+enum SIGN_IN_RESULT_E
+{
+	SIGN_IN_RESULT_SUCCESS		= 1; // 签到成功
+	SIGN_IN_RESULT_ALREADY_SIGN = 2; // 已经签到过
+	SIGN_IN_RESULT_CONFIG_ERRO	= 3; // 配置表错误
+}
+
+// 签到返回
+message sign_in_rsp {
+	required uint32 result_type = 1;
+	required uint32 sign_value  = 2;
+}
+
+// 开服奖励领取请求
+message land_reward_req {
+	required uint32      land_day  = 1; // 领取第几天
+	optional server_head svr_head  = 1000;
+}
+
+message land_reward_rsp {
+	required uint32 result_type = 1; // 0 成功 1 登陆天数不足 2 已经领取过了 3 配置表错误 4 领取限制（包括等级）
+	optional uint32 reward_flag = 2; // 奖励领取的标记
+}
+
+// 开服奖励列表返回
+message land_reward_list_rsp{
+	required uint32 land_day    = 1; // 登陆的天数
+	required uint32 reward_flag = 2; // 奖励领取的标记
+}

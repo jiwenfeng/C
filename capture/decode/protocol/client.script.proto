@@ -1,0 +1,8 @@
+import "client.comm.proto";
+package client;
+
+message script_pb_msg {
+    required string      type_name = 1;
+    required string      bin       = 2;
+    required server_head svr_head  = 1000;
+}

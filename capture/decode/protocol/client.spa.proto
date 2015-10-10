@@ -1,0 +1,61 @@
+import "client.comm.proto";
+package client;
+
+enum ENTER_SPA_RET_E{
+    ESRE_SUCCESS = 0;    // 进入温泉成功
+	ESRE_LVL_LIMIT = 1;  // 等级未达到30级要求
+	ESRE_TIME_LIMIT = 2; // 温泉时间未到
+    ESRE_SYS_ERROR  = 3; // 其它系统错误	
+}
+
+// 请求进入温泉
+message enter_spa_req{
+    required uint32 now = 1; // 客户端的unixtime时间
+	
+	optional server_head svr_head = 1000; // 客户端无须填写的包头
+}
+
+// 进入温泉结果
+message enter_spa_rsp{
+    required ENTER_SPA_RET_E ret = 1; // 进入温泉结果
+}
+
+// 离开温泉请求
+message leave_spa_req{
+    required uint32 now = 1;
+	
+	optional server_head svr_head = 1000; // 客户端无须填写的包头
+}
+
+//  温泉互动
+enum SPA_ACTION_TYPE_E{
+    SATE_XISHUI = 1; // 戏水
+	SATE_CUOBEI = 2; // 搓背
+	SATE_ANMO   = 3; // 按摩
+	SATE_TIMES  = 4; // 获取互动可用次数
+}
+
+// 温泉互动请求
+message spa_action_req{
+    required uint32 dst_role_id = 1; // 对谁互动
+	required SPA_ACTION_TYPE_E action_type = 2; // 互动类型
+	
+	optional server_head svr_head = 1000; // 客户端无须填写的包头
+}
+
+// 互动结果类型
+enum SPA_ACTION_RET_E{
+    SARE_SUCCESS = 0; // 互动成功
+	SARE_TIMES_LIMIT = 1; // 已经没有互动次数了
+	SARE_OUT = 2; // 互动对象已经离开温泉
+}
+
+// 温泉互动信息结果
+message spa_action_msg{
+    required SPA_ACTION_RET_E ret = 1;          // 互动结果
+	required SPA_ACTION_TYPE_E action_type = 2; // 互动类型
+    required uint32 times = 3; // 剩余互动次数	
+	optional uint32 src_role_id = 4; // 发起互动的人
+	optional uint32 dst_role_id = 5; // 被互动的人
+}
+

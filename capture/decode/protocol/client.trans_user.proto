@@ -1,0 +1,26 @@
+import "client.comm.proto";
+package client;
+
+// 登录验证完成后的跳转到场景
+message trans_user {
+	required uint64 ptr = 1; // 用户数据对象
+	optional uint32 map_id = 2[default=0];
+	optional uint32 scene_id = 3[default=0];
+	optional uint32 scene_inst_id = 4[default=0];
+	
+	optional server_head svr_head = 1000; // 服务端填写项，客户端不需要关心也不必填写数据 
+}
+
+// 场景间切换
+message jump_user {
+    required uint64 ptr        = 1;  // 场景用户对象
+    required uint32 trans_id   = 2;  // 跳转点ID
+    required uint32 map_id     = 3;  // 要跳转的目地地图ID
+    required uint32 scene_id   = 4;  // 要跳转的场景ID
+    required int32  x          = 5;  // 要跳转的目标场景的坐标
+    required int32  y          = 6;
+    required int32  z          = 7; 
+    optional uint32 role_id    = 8;  // 跳转用户的角色id
+    optional bool   same_scene = 9;  // 同场景跳转
+}
+

@@ -1,0 +1,181 @@
+import "client.comm.proto";
+package client;
+
+enum ACTIVITY_OPEN_TYPE_E
+{
+	ACTIVITY_OPEN_TYPE_OPEN      = 1; // 新区
+	ACTIVITY_OPEN_TYPE_DATE      = 3; // 指定年月日
+	ACTIVITY_OPEN_TYPE_CIR       = 4; // 指定星期几循环
+}
+
+message item_info {
+	optional uint32 item_count    = 1;
+	optional uint32 activity_type = 2;
+	optional uint32 role_id       = 3; // 单服务限购数据不填充
+}
+
+message value_info {
+	optional uint32 role_id	  = 1; // 角色ID
+	optional uint32 old_value = 2; // 活动开始前记录的值
+	optional uint32 new_value = 3; // 活动开始后变化的值
+	optional uint32 limit_type = 4;
+}
+
+message reward_flag{
+	optional uint32 role_id       = 1;
+	optional uint32 rflag		  = 2;
+	optional uint32 activity_type = 3;
+}
+// 活动记录数据块
+message act_db_info {
+	repeated item_info   center_item = 1;// 单服务限购数据
+	repeated reward_flag flag_info   = 2;// 个人领取奖励标记
+	repeated item_info   person_item = 3;// 个人限购数据
+	repeated value_info  values_info = 4;// 历史记录数据
+	optional uint32      reward_flag = 5;// 奖励的发放标记（服务器重启过，错过奖励发放时间，针对邮件发放）
+}
+
+message act_open_info{
+	required uint32 activity_id  = 1; // 活动ID
+	required  bool   is_activity = 2; // 活动的状态 true 为开启中，flase 关闭
+	optional uint32  remain_time = 3; // 剩余时间
+}
+
+// 活动开启与关闭通知 与活动列表的返回
+message poll_activity_rsp{
+	required uint32  uixtime   =  1;// 没用的
+	repeated act_open_info info = 2;
+}
+
+// 活动数据请求
+message activity_info_req {
+	required uint32       activity_id = 1;
+	optional server_head  svr_head    = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+// 单个活动数据返回
+message activity_info_rsp {
+	required uint32 activity_id    = 1;
+	repeated act_open_info info    = 2;
+	repeated act_db_info db_info   = 3;
+}
+
+message show_item {
+	optional uint32 item_id		= 1;
+	optional uint32 item_count	= 2;
+}
+
+// 活动购买请求
+message activity_shop_req {
+	required uint32 activity_id       = 1;
+	required uint32 item_id		      = 2;// activityItemID
+	required uint32 item_count        = 3;
+	optional server_head  svr_head    = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+
+// 服务器内部使用：活动购买请求center to game
+message activity_shop_c2g{
+	required uint32 activity_id    = 1;
+	required uint32 activity_type  = 2;
+	required uint32 item_count     = 3;
+	required uint32 role_id        = 4;
+	required uint32 close_time	   = 5;
+}
+// 服务器内部使用：活动购买请求game to center
+message activity_shop_g2c {
+	required uint32 activity_id   = 1;
+	required uint32 activity_type = 2;
+	required uint32 item_count    = 3;
+	required uint32 role_id		  = 4;
+	required bool   is_sucess	  = 5;
+	repeated show_item pro_info	   = 6;// 物品
+}
+
+// 活动购买返回
+message activity_shop_rsp {
+	required uint32 result_type    = 1; // 0成功 1失败 2上限了 3 不在活动期间内 4 配置表错误
+	repeated act_db_info db_info   = 2; // 界面数据
+	repeated show_item pro_info	   = 3;// 物品
+}
+// 活动奖励领取请求
+message activity_reward_req{
+	required uint32 activity_id    = 1; 
+	required uint32 activity_type  = 2;// 活动物品表领取的key
+	optional server_head  svr_head    = 1000; // 服务端填写项，客户端不需要关心也不必填写数据
+}
+// 服务器内部使用
+message activity_reward_c2g {
+	required uint32 activity_id		= 1;
+	required uint32 activity_type	= 2;
+	required uint32 role_id         = 3;
+	required uint32 close_time      = 4;
+}
+// 服务器内部使用
+message activity_reward_g2c {
+	required uint32 activity_id		= 1;
+	required uint32 activity_type	= 2;
+	required uint32 role_id         = 3;
+	required bool   is_success		= 4;
+	repeated show_item pro_info	   = 5;// 物品
+}
+
+message activity_reward_rsp {
+	required uint32 activity_id    = 1; 
+	required uint32 result_type    = 2;// 0 成功 1已领取 2活动已结束 3 配置表错误 4 领取条件不足 5领取失败 6 加入军团时间不足48小时 7 不是国王
+	required uint32 activity_type  = 3;// 活动物品表领取的key
+	repeated show_item pro_info	   = 4;// 物品
+}
+
+// 向center 请求下发活动数据id,status
+message load_activity_list_center{
+	required uint32 role_id = 1;
+}
+
+message activity_base{
+	required uint32 activity_id		= 1;
+	required bool   activity_status = 2;
+}
+// 下发活动数据
+message activity_list_rsp{
+	required uint32		   time = 1; 
+	repeated activity_base info = 2;
+}
+
+
+enum BACKGROUND_ACTIVITY_OPEN_TYPE{
+	BACKGROUND_ACTIVITY_OPEN_TYPE_NONE		= 0; // 默认状态
+	BACKGROUND_ACTIVITY_OPEN_TYPE_OPEN		= 1; // 开启中
+	BACKGROUND_ACTIVITY_OPEN_TYPE_CLOSE		= 2; // 结束（已结束，没有循环）
+	BACKGROUND_ACTIVITY_OPEN_TYPE_ALREADY	= 3; // 待开启（关闭中但有循环 或未开启但无循环）
+	BACKGROUND_ACTIVITY_OPEN_TYPE_STOP		= 4; // 暂停，点击操作按钮停止后的状态
+}
+
+enum REWARD_TYPE{
+	REWARD_TYPE_LEVEL			= 1; // 人物等级排名(center 判断)
+	REWARD_TYPE_KING			= 2; // 国王（center 判断） 王都军团（center 判断）
+	REWARD_TYPE_DOUBLE_INGOT    = 3; // 双倍元宝
+	REWARD_TYPE_VIP_LEVEL	    = 4; // vip等级
+	REWARD_TYPE_POWER			= 5; // 装备战力（主人+美人身上穿戴装备）
+	REWARD_TYPE_MOUNT			= 7; // 坐骑阶数
+	REWARD_TYPE_GEM_LEVEL		= 9; // 宝石品级
+	REWARD_TYPE_BOW			    = 11;// 弓箭阶数
+}
+
+message activity_his_record_c2g {
+	required uint32 activity_id		= 1;
+	required uint32 role_id         = 2;
+	required uint32 limit_type      = 3;
+}
+
+message activity_his_record_g2c {
+	required uint32 activity_id		= 1;
+	required uint32 role_id         = 2;
+	required uint32 limit_type      = 3;
+	optional uint32 old_value	    = 4;
+}
+
+message update_activity_record_g2c {
+	required uint32 limit_type  = 1;
+	required uint32 value_count = 2;
+	required uint32 role_id		= 3;
+}

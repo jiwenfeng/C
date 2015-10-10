@@ -1,0 +1,7 @@
+import "client.comm.proto";
+package client;
+
+message role_remove_msg {
+    repeated role_data rd = 1;
+}
+	

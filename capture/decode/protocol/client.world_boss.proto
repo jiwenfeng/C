@@ -1,0 +1,29 @@
+import "client.comm.proto";
+package client;
+
+//服务器内部使用
+message boss_refresh_req
+{
+	required uint32 time = 1;
+}
+
+message boss_info_req {
+	required uint32 time = 1;
+	repeated boss_status bs = 2;
+	optional server_head svr_head = 1000;
+}
+
+message boss_info_rsp {
+	required uint32 timelong = 1;
+	repeated boss_status bs = 2;
+}
+
+message boss_refresh_msg_rsp {
+	required uint32 time = 1;
+}
+
+message boss_status
+{
+	required uint32 raid_id = 1;	// 副本ID
+	optional uint32 status = 2;		// 0 在场景中 1 逃跑 2 死亡
+}

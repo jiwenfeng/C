@@ -1,0 +1,817 @@
+import "client.comm.proto";
+package client;
+
+message family_info {
+    required uint32 id             = 1 ; // 军团ID
+    required string name           = 2 ; // 军团名
+    required uint32 flag_id        = 3 ; // 战旗ID
+    required string flag_name      = 4 ; // 战旗名
+    required uint32 lvl            = 5 ; // 等级
+    required uint32 chief_id       = 6 ; // 军团长ID
+	required string chief_name     = 7; // 军团长名字
+    required uint32 deputy_id      = 8 ; // 副军团长ID
+    required string post           = 9 ; // 公告
+    required uint32 money          = 10 ; // 军团资金
+    required uint32 power          = 11; // 战斗力
+    required uint32 domain         = 12; // 领土数
+    required bool   king           = 13[default = false]; // 王城
+    required bool   emperor        = 14; // 皇城
+    required uint32 cur_member_num = 15; // 当前成员数
+    required bool   approval       = 16; // 审批
+    required uint32 leader_online  = 17; // 0都不在线 1军团长在线 2副军团长在线
+	required uint32	create_time	   = 18; // 军团创建时间
+	required uint32 dragon_count   = 19;// 青龙令
+	required uint32 tiger_count    = 20;// 白虎令
+	required uint32 rosefinch_count = 21;// 朱雀令
+	required uint32 tortoise_count = 22; // 玄武令
+}
+
+message family_diplomacy_info {
+	required uint32 family_id		= 1;
+	required uint32 target_id		= 2;
+	required uint32 relation_type   = 3;
+	optional uint32 apply_time      = 4; 
+}
+
+////////////////////服务器内部使用////////////////////////////////
+// 扣除军团创建相关道具(服务器内部用协议)
+message set_create_famliy_consume {
+	enum result
+	{
+		RESULT_SUCCESS = 1;
+		RESULT_FAILD   = 2;
+	}
+	required uint32 type		   = 1;// 创建的类型
+	required result is_succeed     = 2;//是否成功创建了军团
+	required uint32 role_id		   = 3;
+}
+// 扣除相关捐献的东西与个人贡献的添加(服务器内部用协议)
+message set_donate_consume {
+	required uint32 type		   = 1	 ;
+	required uint32 count		   = 2   ;
+	required bool   is_success     = 3	 ;
+	required uint32 contr_value    = 4	 ;
+	required uint32 role_id        = 5   ;
+	required uint32 total_value    = 6	 ;
+	required uint32 money          = 7   ;
+}
+
+// 设置军团Id(center to game)
+message set_family_req {
+    required uint32      family_id = 1;
+    required uint32      title     = 2;
+    required uint32      role_id   = 3;
+	required uint32		 family_level = 4;
+	optional uint32      donate    = 5;
+}
+
+// 设置军团资金(服务器内部使用 game to center)
+message set_family_money {
+    required uint32      role_id  = 1;
+    required uint32      money    = 2;
+    required uint32      type     = 3;
+	required uint32		 server_id = 4;
+}
+
+// 自动退出军团（服务器内部使用）
+message secede_family_to_center {
+	required uint32 family_id		  = 1;
+	required uint32 role_id			  = 2;
+	required uint32 server_id         = 3;
+}
+
+// 退出军团(服务器内部用)
+message secede_family_game {
+	required uint32 role_id		   = 1;
+	optional server_head svr_head  = 1000;
+}
+
+// 向center请求更新军团数据（服务器内部用协议）
+message update_family_data_from_center {
+	required uint32 family_id   = 1;
+	required uint32 role_id		= 2;
+}
+
+// 服务器内部使用：用于game_ser获取军团数据
+message family_info_req {
+	required uint32 role_id = 1;
+}
+
+message family_info_rsp {
+	required family_info info = 1;
+}
+
+// 修改军团战斗力 成员战斗力改变通知到军团(服务器内部使用 game to center)
+message modify_family_power {
+    required uint32      role_id   = 1;
+    required uint32      family_id = 2;
+    required uint32      new_power = 3;
+}
+// center to game 向game请求更新该角色战斗力
+message update_player_power_to_smy {
+	required uint32 role_id = 1;
+}
+// game to center 
+message notive_center_donate_sucess {
+	required uint32 role_id     = 1;
+	required uint32 type        = 2;
+	required uint32 total_donate = 3;
+	required uint32  ret        = 4;
+	required uint32  money      = 5;
+}
+///////////////王城争霸相关军团的协议部分（服务器内部）/////////////////
+// 军团王城争霸扣军团资金（服务器内部用）
+message family_money_mod_req
+{
+	required uint32 family_id = 1;
+	required uint32 money = 2;
+}
+
+//(服务器内部使用)
+message family_simple_info
+{
+	required uint32 family_id = 1;	//军团ID
+	required string family_name = 2;//军团名字
+	required uint32 flag_id = 3;	//军旗ID
+	required string user_name = 4;	//军团长名字
+	required uint32 role_id = 5;	//军团长ID
+	repeated uint32 alliance = 6;
+}
+
+message family_money_query_req
+{
+	required uint32 family_id = 1;
+	required uint32 role_id = 2;
+	required uint64 inst_id = 3;
+}
+
+message family_money_query_rsp
+{
+	required uint32 family_id = 1;
+	required int32 money = 2;
+	required uint32 role_id = 3;
+	required uint64 inst_id = 4;
+}
+////////////////////客户端对接使用////////////////////////////////
+// 军团列表请求
+message family_list_req {
+    required uint32      unixtime = 1;
+    optional server_head svr_head = 1000;
+}
+
+// 军团列表回复
+message family_list_rsp {
+	required uint32		 list_type = 1; // 整体返回 0
+    repeated family_info family    = 2;
+}
+
+// 创建军团请求
+message create_family_req {
+    enum use {
+        copper = 1; // 铜钱
+        silver = 2; // 银贯
+        token  = 3; // 军团令
+    }
+    required use         type      = 1;
+    required string      name      = 2;    // 军团名
+    required uint32      flag_id   = 3;    // 战旗ID
+    required string      flag_name = 4;    // 战旗名
+    optional server_head svr_head  = 1000; 
+}
+
+// 创建军团回复
+message create_family_rsp {
+    enum result {
+        success      = 0;            // 成功
+        copper_limit = 0x00000001;   // 铜钱不足
+        silver_limit = 0x00000002;   // 银贯不足
+        token_limit  = 0x00000004;   // 军团令不足
+        name_limit   = 0x00000008;   // 军团名不合法
+        flag_limit   = 0x00000010;   // 战旗名不合法
+        have_limit   = 0x00000020;   // 已有军团
+		activity_limit = 0x00000040; // 王城争霸活动开启不能创建军团
+    }
+    required result ret       = 1;
+    optional uint32 family_id = 2; 
+}
+
+// 获取指定军团信息请求
+message family_req {
+    repeated uint32      family_id = 1;
+    optional uint32      scene_id  = 2;
+    optional server_head svr_head  = 1000;
+}
+
+// 获取指定军团信息回复
+message family_rsp {
+    repeated family_info fi = 1;
+}
+
+// 申请军团请求
+message apply_family_req {
+    required uint32      family_id = 1;
+    optional server_head svr_head  = 1000; 
+}
+
+// 申请军团回复
+message apply_family_rsp {
+    enum result {
+        success        = 0;
+        lvl_limit      = 0x00000001;   // 等级不足
+        full_family    = 0x00000002;   // 人员已满
+        apply_count    = 0x00000004;   // 申请次数不足
+        not_family     = 0x00000008;   // 不存在此军团
+        time_out       = 0x00000010;   // 超时
+        leader_offline = 0x00000020;   // 军团长和副军团长不在线
+        have_family    = 0x00000040;   // 已经有军团
+		already_apply  = 0x00000080;   // 已经申请过
+    }
+    required result ret       = 1;
+    required uint32 family_id = 2;
+}
+
+// 设置是否自动同意入军团
+message family_set_req {
+	required uint32      family_id = 1;
+	required uint32		 approval  = 2; // 0 不自动 1 自动
+	optional server_head svr_head  = 1000; 
+}
+
+message family_set_rsp {
+	required uint32 is_success = 1;// 0 成功 1不成功
+	optional uint32	approval   = 2;	  
+}
+
+// 申请军团列表请求
+message apply_family_list_req {
+    required uint32      family_id = 1;    // 军团Id
+    optional server_head svr_head  = 1000;
+}
+
+// 申请军团列表回复
+message apply_family_list_rsp {
+    required uint32 family_id = 1; // 军团Id
+    repeated uint32 role_id   = 2; // 申请者Id
+}
+
+// 审批申请请求
+message approval_family_req {
+    required uint32 family_id     = 1;    // 军团Id
+    required uint32 role_id       = 2;    // 申请者id
+    required uint32 type          = 3;    // 0 允许 1 拒绝 2 忽略
+    optional server_head svr_head = 1000; 
+}
+
+// 审批申请回复
+message approval_family_rsp {
+    enum result {
+        success     = 0;
+        permissions = 0x00000001; // 权限不足
+        full_family = 0x00000002; // 满员
+        pass_join   = 0x00000003; // 其他人已通过
+        reject_join = 0x00000004; // 其他人已拒绝
+        have_family = 0x00000008; // 已有军团
+    }
+    required result ret       = 1;
+    required uint32 family_id = 2;    // 军团Id
+    required uint32 role_id   = 3;    // 申请者id
+    required uint32 type      = 4;    // 0 允许 1 拒绝 2 忽略
+    optional uint32 sect_id   = 5;    // 所属于仙宗ID
+}
+
+// 邀请加入军团请求
+message invite_family_req {
+    required uint32      family_id = 1;    // 军团Id
+    required uint32      role_id   = 2;    // 角色Id
+    optional server_head svr_head  = 1000;
+}
+
+// 邀请加入军团回复
+message invite_family_rsp {
+    enum result {
+        success = 0;
+        null_family = 0x00000001;   // 自己没有军团
+        not_online  = 0x00000002;   // 对方不在线
+        lvl_limit   = 0x00000004;   // 对方等级不足
+        has_family  = 0x00000008;   // 对方已经有军团
+        full_family = 0x00000010;   // 满员
+    }
+    required uint32  family_id = 1;
+    required uint32  role_id   = 2;
+    required result  ret       = 3;
+}
+
+// 邀请加入军团列表请求
+message invite_family_list_req {
+    required uint32      unixtime = 1;
+    optional server_head svr_head = 1000; 
+}
+
+// 回复给邀请者
+message invite_family_info {
+    required uint32 family_id = 1;
+    required uint32 role_id   = 2;
+}
+
+// 邀请加入军团列表回复
+message invite_family_list_rsp {
+    repeated invite_family_info ifi = 1;
+}
+
+// 同意加入军团请求
+message agree_family_req {
+    required uint32      family_id = 1;
+    required uint32      type      = 2;    // 0 允许 1拒绝 2忽略 
+    optional server_head svr_head  = 1000;
+}
+
+// 同意加入军团回复
+message agree_family_rsp {
+    enum result {
+        success     = 0;
+        has_family  = 0x00000001;   // 已经有军团
+        full_family = 0x00000002;   // 满员
+    }
+    required result ret       = 1;
+    required uint32 family_id = 2;
+    required uint32 role_id   = 3;
+    required uint32 type      = 4;
+}
+
+// 修改公告请求
+message modify_family_post_req {
+    required uint32 family_id     = 1;     // 军团Id
+    optional string post          = 2;     // 存在此项就修改公告
+    optional uint32 qq            = 3;     // 存在此项就修改QQ号
+    optional uint32 yy            = 4;     // 存在此项就修改YY号
+    optional server_head svr_head = 1000;
+}
+
+// 修改公告回复
+message modify_family_post_rsp {
+    enum result {
+        success     = 0;
+        permissions = 0x00000001; // 权限不足
+		too_long    = 0x00000002; // 公告太长
+    }
+    required result ret       = 1;
+    required uint32 family_id = 2;     // 军团Id
+    optional string post      = 3;     // 存在此项就修改公告
+    optional uint32 qq        = 4;     // 存在此项就修改QQ号
+    optional uint32 yy        = 5;     // 存在此项就修改YY号
+}
+
+// 解散军团请求
+message disband_family_req {
+    required uint32      family_id = 1;
+    optional server_head svr_head  = 1000; 
+}
+
+// 解散军团回复
+message disband_family_rsp {
+    enum result {
+        success     = 0;
+        permissions = 0x00000001;   // 权限不足
+		family_id_err = 0x00000002; // 军团ID有误
+		family_has_king = 0x00000004; // 王都争霸占有团不能解散
+    }
+    required result ret       = 1;
+    required uint32 family_id = 2;
+}
+
+///////////////////////军团成员///////////////////////
+// 自己在军团里的信息请求
+message family_self_req {
+    required uint32      unixtime = 1;
+    optional server_head svr_head = 1000;
+}
+
+// 自己在军团里的信息回复
+message family_self_rsp {
+    required uint32 family_id   = 1;  // 军团Id
+    required uint32 permissions = 2;  // 权限
+    required uint32 time        = 3;  // 加入时间
+    required uint32 add_by      = 4;  // 添加者
+}
+
+// 自己当前申请的军团请求
+message apply_family_list_self_req {
+    required uint32      unixtime = 1;
+    optional server_head svr_head = 1000;
+}
+
+// 自己当前申请的军团回复
+message apply_family_list_self_rsp {
+    repeated uint32 family_id = 1;
+    repeated uint32 time      = 2;
+}
+
+// 军团成员列表请求
+message family_member_list_req {
+    required uint32      family_id = 1;
+    optional server_head svr_head  = 1000;
+}
+
+// 军团成员
+message family_member_info {
+    required uint32 id          = 1; // 角色id
+    required uint32 permissions = 2; // 权限
+    required uint32 time        = 3; // 加入时间
+	optional uint32 total_donate = 4; // 总贡献值
+}
+
+// 军团成员列表回复
+message family_member_list_rsp {
+    required uint32             family_id = 1;
+    repeated family_member_info fmi       = 2; 
+}
+
+// 修改成员权限
+message modify_family_member_req {
+    required uint32      family_id = 1;   // 军团Id
+    required uint32      role_id   = 2;   // 玩家Id
+    required uint32      type      = 3;   // 0 踢出 2 普通成员 4 术士团长 8 猛将团长 16 天师 32 副团长 64 军团长
+    optional server_head svr_head  = 1000;
+}
+
+// 修改成员回复
+message modify_family_member_rsp {
+    enum result {
+        success     = 0;
+        not_member  = 0x00000001; // 非当前军团成员
+        permissions = 0x00000002; // 权限错误
+        failure     = 0x00000004; // 无效操作
+		king_erro	= 0x00000008; // 您是国王，不能转让军团长
+    }
+    
+    required result ret       = 1;  // 
+    required uint32 family_id = 2;  //
+    required uint32 role_id   = 3;  //
+    required uint32 type      = 4;  //
+}
+
+// 自己退出军团
+message secede_family_req {
+	required uint32 family_id = 1;
+	required uint32 role_id   = 2;
+	optional server_head svr_head  = 1000;
+}
+
+enum SECEDE_FAMILY_TYPE_E
+{
+	SECEDE_FAMILY_TYPE_SUCCESS			= 1;// 退出成功
+	SECEDE_FAMILY_TYPE_LEADER_FAILD		= 2;// 军团长不能直接退军团
+	SECEDE_FAMILY_TYPE_FAILD			= 3;// 退出失败，军团不存在
+}
+
+// 退出军团回复(发送自己与各位在线的退出前的帮派成员通知)
+message secede_family_rsp {
+	required uint32 family_id	= 1;
+	required uint32 role_id		= 2;
+	required uint32 result_type = 3;
+}
+
+// 逐出某人出军团
+message expel_member_req {
+	required uint32 evictee_id		= 1;// 被逐出的人的ID
+	required uint32 family_id		= 2;// 军团ID
+	optional server_head svr_head   = 1000;
+}
+
+enum EXPEL_MEMBER_RESULT_E
+{
+	EXPEL_MEMBER_RESULT_SUCCEED			= 1;	// 逐出成功
+	EXPEL_MEMBER_RESULT_MEMBER_FAILD	= 2;	// 不是当前帮派的成员
+	EXPEL_MEMBER_RESULT_FAMILY_FAILD	= 3;	// 军团不存在
+	EXPEL_MEMBER_RESULT_PERMISSION	    = 4;	// 权限不足
+}
+
+// 逐出军团返回消息（返回给自己与团员，被T的人,若被T的人不在线则不发给被T的人）
+message expel_member_rsp {
+	required uint32 family_id   = 1; // 军团ID
+	required uint32 role_id		= 2; // 逐出某人的发起者ID	
+	required uint32 evictee_id  = 3; // 被逐出的人的ID
+	required uint32 result_type = 4; // 结果
+}
+///////////////////////军团发展//////////////////////
+// 军团升级
+message upgrade_family_req {
+    required uint32 family_id     = 1;
+    optional server_head svr_head = 1000;
+}
+
+message upgrade_family_rsp {
+    enum result {
+        success     = 0;
+        permissions = 1;
+        money_limit = 2;
+    }
+    required result ret        = 1;
+	optional family_info info  = 2; 
+}
+
+
+enum DONATE_TYPE_E 
+{
+	DONATE_TYPE_COIN		= 0;
+	DONATE_TYPE_DRAGON		= 1;
+	DONATE_TYPE_ROSEFINCH   = 2; 
+	DONATE_TYPE_TORROISE    = 3;
+	DONATE_TYPE_TIGER		= 4;
+}
+// 军团捐献
+message donate_family_req {
+    required uint32 family_id     = 1;
+    required uint32 type          = 2; // 0 铜钱 1 青龙 2 白虎 3 朱雀 4 玄武
+    required uint32 num           = 3; // 捐献数量
+    optional server_head svr_head = 1000;
+}
+
+message donate_family_rsp {
+    enum result {
+        success    = 0; 
+        not_enough = 1; // 可供捐献的钱或物品不足
+        day_limit  = 2; // 超过捐献限制
+		donate_type_err = 3;// 捐献的类型不对
+    }
+    required result ret       = 1;
+    required uint32 type      = 2;
+	optional family_info info = 3;
+	optional uint32 total_donate = 4; // 总贡献值
+}
+// 请求捐献列表
+message donate_list_req {
+	required uint32 family_id		= 1;
+	optional server_head svr_head   = 1000;
+}
+
+message donate_info {
+	required uint32 role_id			= 1;
+	required uint32 dragon_count	= 2; // 青龙令
+	required uint32 tiger_count		= 3; // 白虎令
+	required uint32 rosefinch_count = 4; // 朱雀令
+	required uint32 tortoise_count	= 5; // 玄武令
+	required uint32 money           = 6;
+}
+// 捐献列表返回
+message donate_list_rsp {
+	required uint32		 family_id		= 1;
+	repeated donate_info info           = 2;
+}
+///////////////////////军团日志//////////////////////
+// 军团日志请求
+message family_log_req {
+    required uint32 family_id = 1;
+    optional server_head svr_head = 1000;
+}
+
+// 列表
+message family_log_info {
+    required uint32 time  = 1;  // 时间
+    required uint32 type  = 2;  // 日志类型
+    required uint32 key   = 3;  // 关键角色id
+    required uint32 value = 4;  // 影响的值
+	required string family_name = 5; // 军团名字
+}
+
+enum FAMILY_LOG_TYPE {
+    FAMILY_CREATE				= 1;  // key人创建value家族
+    //FAMILY_ADD_MEMBER			= 2;  // key人同意value人加入
+    FAMILY_INVITE_MEMBER		= 3;  // key人加入value家族
+    FAMILY_QUIT_MEMBER			= 4;  // key人退出value家族
+    FAMILY_KCIK_MEMBER			= 5;  // key人踢出value人
+    FAMILY_MODIFY_POST			= 6;  // key人修改公告
+	FAMILY_KILL_PLAYER			= 7;  // key人击败某军团某人(value)
+	FAMILY_BE_KILL_BY_PLAYER    = 8;  // key人被某军团某人(value)击败
+	FAMILY_PROMOTION		    = 9;  // key人成为提升为value职位（参照职位的值）
+	FAMILY_DISMISS			    = 10; // key人撤职某个value职位
+	FAMILY_IMPEACH				= 11; // key人通过弹劾(value)成为军团长
+	FAMILY_UPGRATE_FLAG			= 12; // key为军团ID 升级军旗到（value值）级
+    FAMILY_COIN_DONATE			= 13;  // key人通过捐献铜钱获得value捐献
+    FAMILY_DRAGON_DONATE		= 14; // key人通过捐献青龙令获得value捐献
+    FAMILY_TIGER_DONATE			= 15; // key人通过捐献白虎令获得value捐献
+	FAMILY_ROSEFINCH_DONATE		= 16; // key人通过捐献朱雀令获得value捐献
+	FAMILY_TORROISE_DONATE		= 17; // key人通过捐献玄武令获得value捐献
+    FAMILY_DOMAIN				= 18; // 家族key(0失去 1获得)value领土
+    FAMILY_SIEGE				= 19; // 家族key(0失败 1胜利)攻城战
+    FAMILY_WORLD_BOSS			= 20; // 家族成员key杀掉valueBoss
+	FAMILY_CHANGE_FLAG_ID		= 21; // key 是军团长 本军团启用新的战旗外观
+	FAMILY_CHANGE_FLAG_NAME     = 22; // key 是军团长 军团启用新的战旗名字
+	FAMILY_ALLIANCE				= 23; // key 军团ID value 为同盟ID 结盟     family_name 军团名字
+	FAMILY_CANCEL_ALLIANCE		= 24; // key 军团ID value 为同盟ID 取消同盟 family_name 军团名字
+	FAMILY_ENENY_FAMILY			= 25; // key 军团ID value 为敌对ID 设置敌盟 family_name 军团名字
+	FAMILY_ENENY_CANCEL_FAMILY  = 26; // key 军团ID value 为敌对ID 取消敌盟 family_name 军团名字
+};
+
+// 军团日志回复
+message family_log_rsp {
+    required uint32          family_id = 1;
+    repeated family_log_info fli       = 2;
+}
+
+message family_log_update {
+    required uint32          family_id = 1;
+    repeated family_log_info fli       = 2;
+}
+
+///////////////////////军团战绩//////////////////////
+// 军团战绩请求
+message family_record_req {
+    required uint32      family_id = 1;
+    optional server_head svr_head  = 1000; 
+}
+
+// 列表
+message family_record_info {
+    required uint32 role_id             = 1;  //
+    required uint32 join_num            = 2;  // 参加次数
+    required uint32 kill_chief_num      = 3;  // 杀族长的次数
+    required uint32 kill_vice_chief_num = 4;  // 杀副族长的次数
+    required uint32 kill_elder_num      = 5;  // 杀长老的次数
+    required uint32 kill_elite_num      = 6;  // 杀精英的次数
+    required uint32 kill_member_num     = 7;  // 杀成员的次数
+    required uint32 dead_num            = 8;  // 死亡次数
+    required uint32 be_kill             = 9;  // 杀你最多的人
+    required uint32 be_kill_num         = 10; // 杀你最多的次数
+    required uint32 type                = 11; // 战绩类型
+}
+
+// 军团战绩回复
+message family_record_rsp {
+    required uint32             family_id = 1;
+    repeated family_record_info fri       = 2; 
+}
+
+message family_record_update {
+    required uint32      type          = 1;
+    required uint32      killer_family = 2;
+    required uint32      killer        = 3;
+    required uint32      slain_family  = 4;
+    required uint32      slain_title   = 5;
+    required uint32      slain         = 6;
+    optional server_head svr_head      = 1000;
+}
+////////////////////////////////////////////////
+// 更换战旗形象
+message change_family_flag_id_req {
+	required uint32 family_id          = 1   ;
+	required uint32 flag_id			   = 2	 ; // 更换的战旗ID
+	optional server_head svr_head      = 1000;
+}
+// 更换战旗形象返回
+message change_family_flag_id_rsp {
+	required uint32 result_type  = 1; // 结果 0 成功 1 资源不足 2 配置错误（找不到战旗ID）3 权限不足
+	optional family_info info    = 2; 
+}
+
+// 更换战旗名字
+message change_family_flag_name_req {
+	required uint32			family_id     = 1   ;
+	required string			flag_name	  = 2	; // 名字
+	optional server_head	svr_head      = 1000;
+}
+enum OPT_CHANGE_FLAG_NAME_RESULT
+{
+	OPT_CHANGE_FLAG_NAME_CHANGE_SUCESS = 0;// 战旗改名成功
+	OPT_CHANGE_FLAG_NAME_CAN_NOT_NULL  = 1;// 战旗名字不可为空
+	OPT_CHANGE_FLAG_NAME_TOO_LONG	   = 2;// 战旗名称不可超过6个字
+	OPT_CHANGE_FLAG_NAME_ILLEGAL	   = 3;// 战旗名字中包含敏感非法字符
+	OPT_CHANGE_FLAG_NAME_REPETITION	   = 4;// 战旗名字已被其他军团占用
+	OPT_CHANGE_FLAG_NAME_RESOURCE	   = 5;// 仓库资源不足
+	OPT_CHANGE_FLAG_NAME_PRMISSION_LIMIT = 6; // 权限不足
+	PT_CHANGE_FLAG_NAME_CONFIG_ERRO    = 7;// 配置表错误
+}
+// 更换战旗名字返回
+message change_family_flag_name_rsp {
+	required uint32 result_type  = 1;
+	optional family_info info    = 2; 
+}
+
+// 弹劾军团长
+message impeach_chief_req { 
+	required uint32			family_id	  = 1	;
+	optional server_head	svr_head      = 1000;
+}
+
+enum IMPEACH_RESULT_E
+{
+	IMPEACH_RESULT_SUCESS     = 0; // 弹劾成功
+	IMPEACH_RESULT_TIME_ERRO  = 1; // 大胆，军团长仍健在，不可弹劾
+	IMPEACH_RESULT_HAS_DOMAIN = 2; // 军团拥有王土领地，不可弹劾
+	IMPEACH_RESULT_HAS_KING   = 3; // 国王神般存在，不可弹劾
+	IMPEACH_RESULT_CHIEF_ERRO = 4; // 军团长不能弹劾军团长
+}
+
+// 弹劾返回
+message impeach_chief_rsp {
+	required uint32 result_type = 1; // 弹劾结果 
+	optional family_info info   = 2; // 军团数据
+}
+////////////////////////外交///////////////////////
+enum OPT_FORIGN_TYPE
+{
+	OPT_FORIGN_TYPE_ALLY		= 1; // 同意结盟
+	OPT_FORIGN_TYPE_HOSTILITY   = 2; // 敌对
+	OPT_FORIGN_TYPE_CHECKING    = 3; // 申请结盟
+	OPT_FORIGN_TYPE_REJECT		= 4; // 拒绝结盟
+	OPT_FORIGN_TYPE_REMOVE_ALLY = 5; // 解除同盟（服务器自用）
+	OPT_FORIGN_TYPE_REMOVE_HOS  = 6; // 解除敌盟（服务器自用）
+}
+
+// 结盟 or 敌对
+message ally_family_req {
+	required uint32         opt_type		   = 1; // 3 结盟验证 2 敌对 4拒绝
+	required uint32         family_id          = 2; // 发起者的军团
+	required uint32         target_family_id   = 3; // 目标军团ID
+	optional server_head	svr_head           = 1000;
+}
+
+// 结盟 or 敌对 返回
+message ally_family_rsp {
+	required uint32		result_type		   = 1; // 0 成功 1 失败 2 上限了
+	required uint32     opt_type		   = 2; // 1 结盟 2 敌对 3 验证
+	optional uint32     target_family_id   = 3; // 目标军团ID	
+}
+// 请求解除结盟 or 敌对
+message remove_foreign_req {
+	required uint32			family_id		 = 1; 
+	required uint32			target_family_id = 2; // 目标军团
+	optional server_head	svr_head         = 1000;
+}
+// 解除返回
+message remove_foreign_rsp {
+	required uint32		result_type		   = 1; // 0 成功 1 失败
+	optional uint32     src_family_id      = 2; // 发起者军团ID
+	optional uint32     target_family_id   = 3; // 目标军团ID	
+}
+
+// 请求外交列表
+message ally_family_list_req {
+	required uint32			family_id	     = 1;
+	optional server_head	svr_head         = 1000;
+}
+
+// 外交数据单个结构体
+message ally_info {
+	required uint32 camp_type = 1; // 阵营类型：1 结盟 2敌对 3 申请结盟
+	required uint32 family_id = 2; // 军团ID
+}
+
+// 外交列表返回
+message ally_family_list_rsp {
+	required uint32		 family_id	     = 1;
+	repeated ally_info   info			 = 2;
+}
+
+message activity_opt_rsp {
+	required uint32 result_type = 1; // 1 王城争霸活动开启不能操作
+}
+
+// 加载结盟军团
+message load_friend_family_req {
+	required uint32 family_id = 1;
+	required uint32 role_id = 2;
+}
+
+message load_friend_family_rsp {
+	required uint32 role_id = 1;
+	repeated uint32 id = 2;
+}
+
+message update_friend_family_rsp {
+	required uint32 role_id = 1;
+	required uint32 type = 2;		// 0 移除 1 增加
+	required uint32 family_id = 3;
+}
+
+message family_relation_list
+{
+	repeated uint32 alliance = 1;
+	repeated uint32 enemy = 2;
+}
+
+message update_family_relation
+{
+	required uint32 op_type = 1;	// 0 移除 1 增加
+	required uint32 re_type = 2;	// 1 同盟 2 敌盟
+	required uint32 id = 3;
+}
+
+message family_title_info
+{
+	optional uint32 family_id = 1; // 军团ID
+	optional string name      = 2; // 军团名
+}
+
+enum UPTATE_TYPE_E
+{
+	UPTATE_TYPE_ADD = 1;
+	UPTATE_TYPE_DEL = 2;
+	UPTATE_TYPE_ALL = 3;
+}
+// 客户端接收
+message family_title_list_rsp
+{
+	required uint32			   type    = 1;// 1 增加 2 删除
+	repeated family_title_info info    = 2;// 
+}
