@@ -137,7 +137,7 @@ decode(void *arg)
 	{
 		if(1 == base->term)
 		{
-			break;
+			return NULL;
 		}
 		int sz = 0;
 		char *str = sniffer_buffer_peek(base->sb, &sz);
