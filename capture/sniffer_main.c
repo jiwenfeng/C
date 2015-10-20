@@ -22,11 +22,12 @@ static void proc_sig(int sig);
 struct sniffer_base *
 sniffer_base_init(const char *path)
 {
-	struct sniffer_base *base = (struct sniffer_base *)malloc(sizeof(struct sniffer_base));
+	struct sniffer_base *base = (struct sniffer_base *)malloc(sizeof(struct sniffer_base) + sizeof(pthread_t) * 2);
 	if(NULL == base)
 	{
 		return NULL;
 	}
+	base->thread_num = 2;
 	memset(base, '\0', sizeof(struct sniffer_base));
 	base->cfg = sniffer_config_init(path);
 	if(NULL == base->cfg)
@@ -120,10 +121,18 @@ capture(void *arg)
 	return NULL;
 }
 
+static void 
+cleanup_decode_thread(void *arg)
+{
+	struct sniffer_base *base = (struct sniffer_base *)arg;
+	pthread_mutex_unlock(&base->mutex);
+}
+
 void *
 decode(void *arg)
 {
 	struct sniffer_base *base = (struct sniffer_base *)arg;
+	pthread_cleanup_push(cleanup_decode_thread, base);
 	while(1)
 	{
 		if(1 == base->term)
@@ -148,6 +157,7 @@ decode(void *arg)
 		}
 		sniffer_report(base->cfg->stream, "%s", packet);
 	}
+	pthread_cleanup_pop(1);
 	return NULL;
 }
 
@@ -156,20 +166,23 @@ proc_sig(int sig)
 {
 	if(SIGINT == sig)
 	{
-		global_base->term = 1;
+		int i = 0;
+		for(i = 0; i < global_base->thread_num; ++i)
+		{
+			pthread_cancel(global_base->thread_id[i]);
+		}
 	}
 }
 
 void 
 sniffer_start(struct sniffer_base *base)
 {
-	pthread_t pid[2];
-	pthread_create(&pid[0], NULL, capture, base);
-	pthread_create(&pid[1], NULL, decode, base);
+	pthread_create(&base->thread_id[0], NULL, capture, base);
+	pthread_create(&base->thread_id[1], NULL, decode, base);
 	int i = 0;
 	for(i = 0; i < 2; ++i)
 	{
-		pthread_join(pid[i], NULL);
+		pthread_join(base->thread_id[i], NULL);
 	}
 }
 

@@ -25,8 +25,10 @@ struct sniffer_base
 	struct sniffer_module *sm;
 	struct sniffer_config *cfg;
 	int term;
+	int thread_num;
 	pthread_mutex_t mutex;
 	pthread_cond_t cond;
+	pthread_t thread_id[1];
 };
 
 struct sniffer_base *sniffer_init(const char *path);
