@@ -18,6 +18,7 @@ static void sniffer_base_destroy(struct sniffer_base *sb);
 static void *capture(void *arg);
 static void *decode(void *arg);
 static void proc_sig(int sig);
+static void cleanup_decode_thread(void *arg);
 
 struct sniffer_base *
 sniffer_base_init(const char *path)
@@ -27,7 +28,6 @@ sniffer_base_init(const char *path)
 	{
 		return NULL;
 	}
-	base->thread_num = 2;
 	memset(base, '\0', sizeof(struct sniffer_base));
 	base->cfg = sniffer_config_init(path);
 	if(NULL == base->cfg)
@@ -54,6 +54,7 @@ sniffer_base_init(const char *path)
 		return NULL;
 	}
 	base->term = 0;
+	base->thread_num = 2;
 	return base;
 }
 
@@ -121,7 +122,7 @@ capture(void *arg)
 	return NULL;
 }
 
-static void 
+void 
 cleanup_decode_thread(void *arg)
 {
 	struct sniffer_base *base = (struct sniffer_base *)arg;
@@ -137,7 +138,7 @@ decode(void *arg)
 	{
 		if(1 == base->term)
 		{
-			return NULL;
+			break;
 		}
 		int sz = 0;
 		char *str = sniffer_buffer_peek(base->sb, &sz);
