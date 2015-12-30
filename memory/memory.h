@@ -15,5 +15,6 @@ struct memory_bucket
 void memory_free(struct memory_bucket *bucket, void *p);
 struct memory_bucket *memory_bucket_init();
 void *memory_alloc(struct memory_bucket *bucket, size_t size);
+void memory_bucket_destroy(struct memory_bucket *bucket);
 
 #endif

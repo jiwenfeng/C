@@ -53,9 +53,9 @@ memory_alloc(struct memory_bucket *bucket, size_t size)
 		{
 			return NULL;
 		}
-		union memory_block *head = bucket->flist[n].next;
-		char *p = (char *)head;
-		head = head->next;
+		union memory_block **head = &bucket->flist[n].next;
+		char *p = (char *)*head;
+		*head = (*head)->next;
 		memset(p, real, real);
 		return p + sizeof(size_t);
 	}
@@ -87,15 +87,38 @@ memory_bucket_init()
 	return bucket;
 }
 
+void 
+memory_bucket_destroy(struct memory_bucket *bucket)
+{
+	int i = 0;
+	for(i = 0; i < NBLOCKS; ++i)
+	{
+		if(bucket->flist[i].next != NULL)
+		{
+			free(bucket->flist[i].next);
+		}
+	}
+	free(bucket->flist);
+	free(bucket);
+}
+
 int 
 main()
 {
 	struct memory_bucket *bucket = memory_bucket_init();
-	int i = 0;
-	for(i = 0; i < 1000000000; i++)
-	{
-		char *p = (char *)memory_alloc(bucket, 100);
-		memory_free(bucket, p);
-	}
+
+	const char *str = "hello world";
+	size_t n = strlen(str) + 1;
+	char *p = (char *)memory_alloc(bucket, n);
+
+	memset(p, '\0', n);
+
+	memcpy(p, str, n - 1);
+
+	printf("%s\n", p);
+
+	memory_free(bucket, p);
+
+	memory_bucket_destroy(bucket);
 	return 0;
 }
