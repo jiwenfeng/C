@@ -16,7 +16,7 @@ struct message_queue
 	int lock;
 	int idx;
 	struct message *head;
-	struct message *last;
+	struct message **last;
 };
 
 
@@ -35,7 +35,7 @@ void message_queue_debug(struct message_queue *mq);
 #define unlock(q)
 #endif
 
-#define LOOP_NUM 50000 / THREAD_NUM
+#define LOOP_NUM 50 / THREAD_NUM
 
 struct message_queue *
 message_queue_init()
@@ -43,7 +43,8 @@ message_queue_init()
 	struct message_queue *mq = (struct message_queue *)malloc(sizeof(struct message_queue));
 	mq->lock = 0;
 	mq->idx = 0;
-	mq->head = mq->last = NULL;
+	mq->head = NULL;
+	mq->last = &mq->head;
 	return mq;
 }
 
@@ -68,16 +69,28 @@ message_queue_push(struct message_queue *mq)
 	msg->next = NULL;
 	msg->pid = pthread_self();
 	lock(mq);
+	*mq->last = msg;
+	mq->last = &msg->next;
+	unlock(mq);
+}
+
+struct message *
+message_queue_pop(struct message_queue *mq)
+{
+	lock(mq);
+	struct message *msg = mq->head;
+	if(NULL == msg)
+	{
+		unlock(mq);
+		return NULL;
+	}
+	mq->head = msg->next;
 	if(mq->head == NULL)
 	{
-		mq->head = msg;
+		mq->last = &mq->head;
 	}
-	else
-	{
-		mq->last->next = msg;
-	}
-	mq->last = msg;
 	unlock(mq);
+	return msg;
 }
 
 void
@@ -96,10 +109,9 @@ push_message(void *arg)
 {
 	struct message_queue *mq = (struct message_queue *)arg;
 	int i = 0;
-	while(i < LOOP_NUM)
+	for(i = 0; i < LOOP_NUM; ++i)
 	{
 		message_queue_push(mq);
-		++i;
 	}
 	return NULL;
 }
