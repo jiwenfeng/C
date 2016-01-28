@@ -38,6 +38,10 @@ kmp_search(const char *text, const char *p)
 	int i = 0, j = 0;
 	for(i = 0; i < l1; ++i)
 	{
+		if(l2 - j > l1 - i)
+		{
+			break;
+		}
 		if(p[j] == text[i])
 		{
 			++j;
@@ -60,14 +64,23 @@ main()
 	const char *text1 = "helloworldasdcrwiqurh234lkjalncakdnfklajhtiuaozhanzhehaohangtianfeijishenkongbaozhaduiyuzilingsakdfjelu5rhog3u5hfa;ldscnhjzhangyanhaahhatianzhanzhehaoasdlfi3qupojfc;dskcn4wuo5yxigusdfjhaidcsjdcnaiugbtoiu3b;nackeou45gqpadnczx,cnvbwuh efruhr;wlejfadknckljgtb4qi5bm adfjgvlksfadaabababadtnasdfurebsadfnbcndirnortncdalsdabababacahaiuhfruaceuab";
 	const char *text2 = "abababababababababababababababababababababababababababababababababababababababababababababababababababababababababaababaababababababababababababababababababababababababababbbbbbbbbbbbbbbbbabababbababababababababababacbababababababa";
 	const char *p = "ababac";
-	int ret = kmp_search(text, p);
-	if(ret != -1)
+	int r1 = kmp_search(text1, p);
+	if(r1 != -1)
 	{
-		printf("search [%s] in [%s] at [%d]\n", p, text, ret);
+		printf("search [%s] in [%s] at [%d]\n", p, text1, r1);
 	}
 	else
 	{
-		printf("[%s] is not in the [%s]\n", p, text);
+		printf("[%s] is not in the [%s]\n", p, text1);
+	}
+	int r2 = kmp_search(text2, p);
+	if(r2 != -1)
+	{
+		printf("search [%s] in [%s] at [%d]\n", p, text2, r2);
+	}
+	else
+	{
+		printf("[%s] is not in the [%s]\n", p, text2);
 	}
 	return 0;
 }
