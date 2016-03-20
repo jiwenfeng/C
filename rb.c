@@ -124,7 +124,7 @@ insert(struct node **root, int v)
 {
 	struct node *p = NULL;
 	struct node *n = (struct node *)malloc(sizeof(struct node));
-	memset(n, '\0', sizeof(struct node));
+	n->lchild = n->rchild = n->parent = NULL;
 	n->color = RED;
 	n->v = v;
 	struct node **tmp = root;
@@ -143,15 +143,16 @@ insert(struct node **root, int v)
 	return 1;
 }
 
-void display(struct node *root)
+static void 
+debug(struct node *root)
 {
 	if(root == NULL)
 	{
 		return ;
 	}
 	printf("%p:%d %s lchild(%p) rchild(%p)\n", root, root->v, root->color == BLACK ? "black" : "red", root->lchild, root->rchild);
-	display(root->lchild);
-	display(root->rchild);
+	debug(root->lchild);
+	debug(root->rchild);
 }
 
 static void
@@ -205,7 +206,7 @@ main()
 	{
 		insert(&root, a[i]);
 	}
-	display(root);
+	debug(root);
 
 	printf("min = %d max = %d\n", get_min(root), get_max(root));
 
