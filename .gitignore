@@ -8,3 +8,4 @@ engineCode/
 !*.sh
 !*.md
 !config
+!rb

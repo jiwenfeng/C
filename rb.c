@@ -76,7 +76,7 @@ RRotation(struct node *r)
 }
 
 static void
-rb_fix_up(struct node *r, struct node **root)
+rb_insert_fixup(struct node *r, struct node **root)
 {
 	while(COLOR(FATHER(r)) == RED)
 	{
@@ -111,12 +111,13 @@ rb_fix_up(struct node *r, struct node **root)
 			RRotation(GRANDPA(r));
 			r = FATHER(r);
 		}
-		if(FATHER(r) == NULL)
+		if(NULL == FATHER(r))
 		{
 			*root = r;
-			return;
+			break;
 		}
 	}
+	(*root)->color = BLACK;
 }
 
 int 
@@ -127,26 +128,46 @@ insert(struct node **root, int v)
 	n->lchild = n->rchild = n->parent = NULL;
 	n->color = RED;
 	n->v = v;
-	struct node **tmp = root;
-	for(; *tmp != NULL && (*tmp)->v != v && (p = *tmp); )
+	struct node **itr = root;
+	for(; *itr != NULL && (*itr)->v != v && (p = *itr); )
 	{
-		tmp = (*tmp)->v > v ? &(*tmp)->lchild : &(*tmp)->rchild;
+		itr = (*itr)->v > v ? &(*itr)->lchild : &(*itr)->rchild;
 	}
-	if(*tmp && (*tmp)->v == v)
+	if(*itr && (*itr)->v == v)
 	{
 		return 0;
 	}
 	n->parent = p;
-	*tmp = n;
-	rb_fix_up(n, root);
-	(*root)->color = BLACK;
+	*itr = n;
+	rb_insert_fixup(n, root);
 	return 1;
+}
+
+static void
+rb_delete_fixup(struct node *n, struct node **root)
+{
+	// TODO
+}
+
+void 
+delete(struct node **root, int n)
+{
+	struct node *itr = *root;
+	for(; itr && itr->v != n; )
+	{
+		itr = itr->v > n ? itr->lchild : itr->rchild;
+	}
+	if(NULL == itr)
+	{
+		return;
+	}
+	// TODO
 }
 
 static void 
 debug(struct node *root)
 {
-	if(root == NULL)
+	if(NULL == root)
 	{
 		return ;
 	}
