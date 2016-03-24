@@ -120,6 +120,14 @@ rb_insert_fixup(struct node *r, struct node **root)
 	(*root)->color = BLACK;
 }
 
+static void
+swap(struct node *i1, struct node *i2)
+{
+	int n = i1->v;
+	i1->v = i2->v;
+	i2->v = n;
+}
+
 int 
 insert(struct node **root, int v)
 {
@@ -147,6 +155,9 @@ static void
 rb_delete_fixup(struct node *n, struct node **root)
 {
 	// TODO
+	while(1)
+	{
+	}
 }
 
 void 
@@ -161,7 +172,22 @@ delete(struct node **root, int n)
 	{
 		return;
 	}
-	// TODO
+	struct node *i = itr->rchild;
+	while(i && i->lchild)
+	{
+		i = i->lchild;
+	}
+	if(i)
+	{
+		i->parent->lchild = i->rchild;
+		if(i->rchild)
+		{
+			i->rchild->parent = i->parent;
+		}
+		swap(itr, i);
+		rb_delete_fixup(i->rchild, root);
+		free(i);
+	}
 }
 
 static void 
