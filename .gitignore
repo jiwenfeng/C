@@ -1,4 +1,5 @@
 *
+!rb
 engineCode/
 !*.c
 !*.cpp
@@ -8,4 +9,3 @@ engineCode/
 !*.sh
 !*.md
 !config
-!rb
