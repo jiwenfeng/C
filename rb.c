@@ -2,6 +2,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <limits.h>
+#include <sys/time.h>
+#include <unistd.h>
 
 struct node 
 {
@@ -24,7 +26,7 @@ struct node
 #define UNCLE(x) ((GRANDPA(x)->lchild == FATHER(x)) ? (GRANDPA(x)->rchild) : (GRANDPA(x)->lchild))
 
 static void
-LRotation(struct node *r)
+RRotation(struct node *r)
 {
 	struct node *p = r->parent;
 	struct node *c = r->lchild;
@@ -50,7 +52,7 @@ LRotation(struct node *r)
 }
 
 static void
-RRotation(struct node *r)
+LRotation(struct node *r)
 {
 	struct node *p = r->parent;
 	struct node *c = r->rchild;
@@ -92,11 +94,11 @@ rb_insert_fixup(struct node *r, struct node **root)
 			if(FATHER(r)->rchild == r) // R
 			{
 				r = FATHER(r);
-				RRotation(r);
+				LRotation(r);
 			}
 			FATHER(r)->color = BLACK;
 			GRANDPA(r)->color = RED;
-			LRotation(GRANDPA(r));
+			RRotation(GRANDPA(r));
 			r = FATHER(r);
 		}
 		else	// R
@@ -104,11 +106,11 @@ rb_insert_fixup(struct node *r, struct node **root)
 			if(FATHER(r)->lchild == r) // L
 			{
 				r = FATHER(r);
-				LRotation(r);
+				RRotation(r);
 			}
 			FATHER(r)->color = BLACK;
 			GRANDPA(r)->color = RED;
-			RRotation(GRANDPA(r));
+			LRotation(GRANDPA(r));
 			r = FATHER(r);
 		}
 		if(NULL == FATHER(r))
@@ -131,21 +133,22 @@ swap(struct node *i1, struct node *i2)
 int 
 insert(struct node **root, int v)
 {
-	struct node *p = NULL;
-	struct node *n = (struct node *)malloc(sizeof(struct node));
-	n->lchild = n->rchild = n->parent = NULL;
-	n->color = RED;
-	n->v = v;
 	struct node **itr = root;
-	for(; *itr != NULL && (*itr)->v != v && (p = *itr); )
+	struct node *p = NULL;
+	while(*itr != NULL)
 	{
+		if((*itr)->v == v)
+		{
+			return 0;
+		}
+		p = *itr;
 		itr = (*itr)->v > v ? &(*itr)->lchild : &(*itr)->rchild;
 	}
-	if(*itr && (*itr)->v == v)
-	{
-		return 0;
-	}
+	struct node *n = (struct node *)malloc(sizeof(struct node));
+	n->lchild = n->rchild = NULL;
 	n->parent = p;
+	n->v = v;
+	n->color = RED;
 	*itr = n;
 	rb_insert_fixup(n, root);
 	return 1;
@@ -154,8 +157,7 @@ insert(struct node **root, int v)
 static void
 rb_delete_fixup(struct node *n, struct node **root)
 {
-	// TODO
-	while(1)
+	while(n != *root && COLOR(n) == BLACK)
 	{
 	}
 }
@@ -179,10 +181,10 @@ delete(struct node **root, int n)
 	}
 	if(i)
 	{
-		i->parent->lchild = i->rchild;
+		FATHER(i)->lchild = i->rchild;
 		if(i->rchild)
 		{
-			i->rchild->parent = i->parent;
+			FATHER(i->rchild) = FATHER(i);
 		}
 		swap(itr, i);
 		rb_delete_fixup(i->rchild, root);
@@ -245,11 +247,12 @@ get_min(struct node *root)
 int
 main()
 {
-	int a[] = {12, 32, 19, 89, 84, 29, 39, 17, 10, 11, 3, 80, 79, 20, 54, 14, 78, 7, 123, 90};
+	int a[] = {12, 32, 11, 23, 90, 84, 75, 81, 30, 20, 10, 76, 1, 3, 98, 72, 25, 80};
+	int i;
 #define N (sizeof(a) / sizeof(a[0]))
 
 	struct node *root = NULL;
-	for(int i = 0; i < N; ++i)
+	for(i = 0; i < N; ++i)
 	{
 		insert(&root, a[i]);
 	}
