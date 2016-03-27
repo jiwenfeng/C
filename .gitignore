@@ -1,5 +1,5 @@
 *
-!rb
+*.c.swp
 engineCode/
 !*.c
 !*.cpp

@@ -25,6 +25,7 @@ struct node
 
 #define UNCLE(x) ((GRANDPA(x)->lchild == FATHER(x)) ? (GRANDPA(x)->rchild) : (GRANDPA(x)->lchild))
 
+
 static void
 RRotation(struct node *r)
 {
@@ -155,11 +156,17 @@ insert(struct node **root, int v)
 }
 
 static void
-rb_delete_fixup(struct node *n, struct node **root)
+rb_delete_fixup(struct node **root, struct node *n)
 {
 	while(n != *root && COLOR(n) == BLACK)
 	{
+		break;
 	}
+}
+
+static void
+rb_delete(struct node **root, struct node *n)
+{
 }
 
 void 
@@ -174,22 +181,7 @@ delete(struct node **root, int n)
 	{
 		return;
 	}
-	struct node *i = itr->rchild;
-	while(i && i->lchild)
-	{
-		i = i->lchild;
-	}
-	if(i)
-	{
-		FATHER(i)->lchild = i->rchild;
-		if(i->rchild)
-		{
-			FATHER(i->rchild) = FATHER(i);
-		}
-		swap(itr, i);
-		rb_delete_fixup(i->rchild, root);
-		free(i);
-	}
+	rb_delete(root, itr);
 }
 
 static void 
@@ -247,7 +239,8 @@ get_min(struct node *root)
 int
 main()
 {
-	int a[] = {12, 32, 11, 23, 90, 84, 75, 81, 30, 20, 10, 76, 1, 3, 98, 72, 25, 80};
+	int a[] = {20, 30, 25, 50};
+//	int a[] = {12, 32, 11, 23, 90, 84, 75, 81, 30, 20, 10, 76, 1, 3, 98, 72, 25, 80};
 	int i;
 #define N (sizeof(a) / sizeof(a[0]))
 
@@ -260,6 +253,9 @@ main()
 
 	printf("min = %d max = %d\n", get_min(root), get_max(root));
 
+	delete(&root, 30);
+
+	debug(root);
 	destroy(root);
 	return 0;
 }
