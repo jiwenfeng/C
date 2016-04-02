@@ -28,7 +28,7 @@ struct node
 #define SWAP(i1, i2) do {int val = (i1)->v; (i1)->v = (i2)->v; (i2)->v = val; } while (0)
 
 static void
-RRotation(struct node *r)
+rb_r_rotation(struct node *r)
 {
 	struct node *p = r->parent;
 	struct node *c = r->lchild;
@@ -54,7 +54,7 @@ RRotation(struct node *r)
 }
 
 static void
-LRotation(struct node *r)
+rb_l_rotation(struct node *r)
 {
 	struct node *p = r->parent;
 	struct node *c = r->rchild;
@@ -96,11 +96,11 @@ rb_insert_fixup(struct node *r, struct node **root)
 			if(FATHER(r)->rchild == r) // R
 			{
 				r = FATHER(r);
-				LRotation(r);
+				rb_l_rotation(r);
 			}
 			FATHER(r)->color = BLACK;
 			GRANDPA(r)->color = RED;
-			RRotation(GRANDPA(r));
+			rb_r_rotation(GRANDPA(r));
 			r = FATHER(r);
 		}
 		else	// R
@@ -108,11 +108,11 @@ rb_insert_fixup(struct node *r, struct node **root)
 			if(FATHER(r)->lchild == r) // L
 			{
 				r = FATHER(r);
-				RRotation(r);
+				rb_r_rotation(r);
 			}
 			FATHER(r)->color = BLACK;
 			GRANDPA(r)->color = RED;
-			LRotation(GRANDPA(r));
+			rb_l_rotation(GRANDPA(r));
 			r = FATHER(r);
 		}
 		if(NULL == FATHER(r))
@@ -160,7 +160,7 @@ rb_delete_fixup(struct node **root, struct node *p, struct node *n)
 			{
 				b->color = BLACK;
 				p->color = RED;
-				RRotation(p);
+				rb_r_rotation(p);
 				b = p->rchild;
 			}
 			if(COLOR(b->lchild) == BLACK && COLOR(b->rchild) == BLACK)
@@ -175,14 +175,14 @@ rb_delete_fixup(struct node **root, struct node *p, struct node *n)
 				{
 					b->lchild->color = BLACK;
 					b->color = RED;
-					RRotation(b);
+					rb_r_rotation(b);
 					b = p->rchild;
 				}
 				b->color = p->color;
 				p->color = BLACK;
 				b->rchild->color = BLACK;
 				n = *root;
-				LRotation(p);
+				rb_l_rotation(p);
 			}
 		}
 		else
@@ -192,7 +192,7 @@ rb_delete_fixup(struct node **root, struct node *p, struct node *n)
 			{
 				b->color = BLACK;
 				p->color = RED;
-				LRotation(p);
+				rb_l_rotation(p);
 				b = p->lchild;
 			}
 			if(COLOR(b->lchild) == BLACK && COLOR(b->rchild) == BLACK)
@@ -207,14 +207,14 @@ rb_delete_fixup(struct node **root, struct node *p, struct node *n)
 				{
 					b->lchild->color = BLACK;
 					b->color = RED;
-					LRotation(b);
+					rb_l_rotation(b);
 					b = p->lchild;
 				}
 				b->color = p->color;
 				p->color = BLACK;
 				b->lchild->color = BLACK;
 				n = *root;
-				RRotation(p);
+				rb_r_rotation(p);
 			}
 		}
 
