@@ -17,11 +17,11 @@ struct node
 #define RED 0x01
 #define BLACK 0x02
 
-#define FATHER(x) ((x)->parent)
-
 #define COLOR(x) ((x) ? ((x)->color) : BLACK)
 
 #define GRANDPA(x) FATHER(FATHER(x))
+
+#define FATHER(x) ((x)->parent)
 
 #define UNCLE(x) ((GRANDPA(x)->lchild == FATHER(x)) ? (GRANDPA(x)->rchild) : (GRANDPA(x)->lchild))
 
@@ -156,17 +156,121 @@ insert(struct node **root, int v)
 }
 
 static void
-rb_delete_fixup(struct node **root, struct node *n)
+rb_delete_fixup(struct node **root, struct node *p, struct node *n)
 {
-	while(n != *root && COLOR(n) == BLACK)
+	while(COLOR(n) == BLACK && n != *root)
 	{
-		break;
+		if(p->lchild == n)
+		{
+			struct node *b = p->rchild;
+			if(COLOR(b) == RED)
+			{
+				b->color = BLACK;
+				p->color = RED;
+				RRotation(p);
+				b = p->rchild;
+			}
+			if(COLOR(b->lchild) == BLACK && COLOR(b->rchild) == BLACK)
+			{
+				b->color = RED;
+				n = p;
+				p = FATHER(p);
+			}
+			else
+			{
+				if(COLOR(b->lchild) == RED)
+				{
+					b->lchild->color = BLACK;
+					b->color = RED;
+					RRotation(b);
+					b = p->rchild;
+				}
+				b->color = p->color;
+				p->color = BLACK;
+				b->rchild->color = BLACK;
+				n = *root;
+				LRotation(p);
+			}
+		}
+		else
+		{
+			struct node *b = p->lchild;
+			if(COLOR(b) == RED)
+			{
+				b->color = BLACK;
+				p->color = RED;
+				LRotation(p);
+				b = p->lchild;
+			}
+			if(COLOR(b->lchild) == BLACK && COLOR(b->rchild) == BLACK)
+			{
+				b->color = RED;
+				n = p;
+				p = FATHER(p);
+			}
+			else
+			{
+				if(COLOR(b->rchild) == RED)
+				{
+					b->lchild->color = BLACK;
+					b->color = RED;
+					LRotation(b);
+					b = p->lchild;
+				}
+				b->color = p->color;
+				p->color = BLACK;
+				b->lchild->color = BLACK;
+				n = *root;
+				RRotation(p);
+			}
+		}
+
+	}
+	if(n != NULL)
+	{
+		n->color = BLACK;
 	}
 }
 
 static void
 rb_delete(struct node **root, struct node *n)
 {
+	struct node **itr = &n->rchild;
+	while(*itr != NULL)
+	{
+		if((*itr)->lchild == NULL)
+		{
+			break;
+		}
+		itr = &(*itr)->lchild;
+	}
+	struct node *x = *itr;
+	if(x != NULL)
+	{
+		if(x->rchild != NULL)
+		{
+			FATHER(x->rchild) = FATHER(x);
+		}
+		*itr = x->rchild;
+		swap(n, x);
+	}
+	else
+	{
+		x = n;
+		if(FATHER(n)->lchild == n)
+		{
+			FATHER(n)->lchild = NULL;
+		}
+		else
+		{
+			FATHER(n)->rchild = NULL;
+		}
+	}
+	if(COLOR(x) == BLACK)
+	{
+		rb_delete_fixup(root, FATHER(x), x->rchild);
+	}
+	free(x);
 }
 
 void 
@@ -239,8 +343,7 @@ get_min(struct node *root)
 int
 main()
 {
-	int a[] = {20, 30, 25, 50};
-//	int a[] = {12, 32, 11, 23, 90, 84, 75, 81, 30, 20, 10, 76, 1, 3, 98, 72, 25, 80};
+	int a[] = {12, 32, 11, 23, 90, 84, 75, 81, 30, 20, 10, 76, 1, 3, 98, 72, 25, 80};
 	int i;
 #define N (sizeof(a) / sizeof(a[0]))
 
@@ -253,8 +356,7 @@ main()
 
 	printf("min = %d max = %d\n", get_min(root), get_max(root));
 
-	delete(&root, 30);
-
+	delete(&root, 90);
 	debug(root);
 	destroy(root);
 	return 0;
