@@ -25,6 +25,7 @@ struct node
 
 #define UNCLE(x) ((GRANDPA(x)->lchild == FATHER(x)) ? (GRANDPA(x)->rchild) : (GRANDPA(x)->lchild))
 
+#define SWAP(i1, i2) do {int val = (i1)->v; (i1)->v = (i2)->v; (i2)->v = val; } while (0)
 
 static void
 RRotation(struct node *r)
@@ -121,14 +122,6 @@ rb_insert_fixup(struct node *r, struct node **root)
 		}
 	}
 	(*root)->color = BLACK;
-}
-
-static void
-swap(struct node *i1, struct node *i2)
-{
-	int n = i1->v;
-	i1->v = i2->v;
-	i2->v = n;
 }
 
 int 
@@ -252,7 +245,7 @@ rb_delete(struct node **root, struct node *n)
 			FATHER(x->rchild) = FATHER(x);
 		}
 		*itr = x->rchild;
-		swap(n, x);
+		SWAP(n, x);
 	}
 	else
 	{
@@ -353,10 +346,8 @@ main()
 		insert(&root, a[i]);
 	}
 	debug(root);
-
 	printf("min = %d max = %d\n", get_min(root), get_max(root));
-
-	delete(&root, 90);
+	delete(&root, 32);
 	debug(root);
 	destroy(root);
 	return 0;
