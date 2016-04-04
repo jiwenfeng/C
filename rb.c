@@ -270,9 +270,9 @@ void
 delete(struct node **root, int n)
 {
 	struct node *itr = *root;
-	for(; itr && itr->v != n; )
+	for(; itr && itr->v != n; itr = itr->v > n ? itr->lchild : itr->rchild)
 	{
-		itr = itr->v > n ? itr->lchild : itr->rchild;
+//		itr = itr->v > n ? itr->lchild : itr->rchild;
 	}
 	if(NULL == itr)
 	{

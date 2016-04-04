@@ -35,6 +35,8 @@ avl_l_rotation(struct node *n)
 	FATHER(r) = f;
 	r->lchild = n;
 	FATHER(n) = r;
+	n->height = MAX(HEIGHT(n->lchild), HEIGHT(n->rchild)) + 1;
+	r->height = MAX(HEIGHT(r->lchild), HEIGHT(r->rchild)) + 1;
 	if(f)
 	{
 		if(f->lchild == n)
@@ -45,9 +47,8 @@ avl_l_rotation(struct node *n)
 		{
 			f->rchild = r;
 		}
+		f->height = MAX(HEIGHT(f->lchild), HEIGHT(f->rchild)) + 1;
 	}
-	n->height = MAX(HEIGHT(n->lchild), HEIGHT(n->rchild)) + 1;
-	r->height = MAX(HEIGHT(r->lchild), HEIGHT(r->rchild)) + 1;
 }
 
 void
@@ -63,6 +64,8 @@ avl_r_rotation(struct node *n)
 	FATHER(l) = f;
 	l->rchild = n;
 	FATHER(n) = l;
+	n->height = MAX(HEIGHT(n->lchild), HEIGHT(n->rchild)) + 1;
+	l->height = MAX(HEIGHT(l->lchild), HEIGHT(l->rchild)) + 1;
 	if(f)
 	{
 		if(f->lchild == n)
@@ -73,9 +76,8 @@ avl_r_rotation(struct node *n)
 		{
 			f->rchild = l;
 		}
+		f->height = MAX(HEIGHT(f->lchild), HEIGHT(f->rchild)) + 1;
 	}
-	n->height = MAX(HEIGHT(n->lchild), HEIGHT(n->rchild)) + 1;
-	l->height = MAX(HEIGHT(l->lchild), HEIGHT(l->rchild)) + 1;
 }
 
 static void
@@ -149,7 +151,9 @@ avl_insert(struct node **root, int v)
 static void
 avl_delete_fixup(struct node **root, struct node *n)
 {
-	while(abs(HEIGHT(n->lchild) - HEIGHT(n->rchild)) >= 2)
+	// TODO
+#if 0
+	while(1)
 	{
 		if(HEIGHT(n->lchild) - HEIGHT(n->rchild) >= 2)
 		{
@@ -158,7 +162,6 @@ avl_delete_fixup(struct node **root, struct node *n)
 				avl_l_rotation(n->lchild);
 			}
 			avl_r_rotation(n);
-			n = FATHER(n);
 		}
 		else
 		{
@@ -169,11 +172,6 @@ avl_delete_fixup(struct node **root, struct node *n)
 					avl_r_rotation(n->rchild);
 				}
 				avl_l_rotation(n);
-				n = FATHER(n);
-			}
-			else
-			{
-				n = FATHER(n);
 			}
 		}
 		if(FATHER(n) == NULL)
@@ -181,7 +179,9 @@ avl_delete_fixup(struct node **root, struct node *n)
 			*root = n;
 			break;
 		}
+		n = FATHER(n);
 	}
+#endif
 }
 
 void 
@@ -219,6 +219,12 @@ avl_delete(struct node **root, int v)
 		}
 		*itr = x->rchild;
 	}
+	struct node *p = FATHER(x);
+	while(p)
+	{
+		p->height = MAX(HEIGHT(p->lchild), HEIGHT(p->rchild)) + 1;
+		p = FATHER(p);
+	}
 	avl_delete_fixup(root, FATHER(x));
 	free(x);
 }
@@ -230,7 +236,7 @@ avl_debug(struct node *root)
 	{
 		return ;
 	}
-	printf("%d:%d %d\n", root->value, root->lchild ? root->lchild->value : -1, root->rchild ? root->rchild->value : -1);
+	printf("%d(%d):%d %d\n", root->value, root->height, root->lchild ? root->lchild->value : -1, root->rchild ? root->rchild->value : -1);
 	avl_debug(root->lchild);
 	avl_debug(root->rchild);
 }
@@ -250,7 +256,9 @@ avl_destroy(struct node *root)
 int
 main(int argc, char *argv[])
 {
-	int a[] = {32, 12, 23, 21, 59, 90, 68, 80, 41, 72, 34, 89, 21, 97, 56, 70, 10, 13};
+//	int a[] = {5, 10, 4, 12};
+//	int a[] = {32, 12, 23, 21, 59, 90, 68, 80, 41, 72, 34, 89, 21, 97, 56, 70, 10, 13};
+	int a[] = {40, 20, 9, 10, 5, 3, 4,1, 11, 70, 60, 80, 50};
 #define N (sizeof(a) / sizeof(a[0]))
 	int i = 0;
 
