@@ -9,3 +9,4 @@ engineCode/
 !*.sh
 !*.md
 !config
+!*.s
