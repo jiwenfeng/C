@@ -1,11 +1,19 @@
-CFLAG=-Wall -g -O2 -I. -I/usr/local/include/ -I/usr/include/
 CC=gcc
-OBJ=queue.o
-main:$(OBJ)
-	$(CC) $(CFLAG) $(OBJ) -o main 
+CFLAGS=-g -Wall
+SRC=$(wildcard *.c)
+OBJ=$(patsubst %.c, %.o, $(SRC))
+TARGET=$(subst .o, , $(OBJ))
+LIB=-lpthread
 
-queue.o:queue.c queue.h
-	$(CC) $(CFLAG) -c $< 
+all:$(TARGET)
+	@echo "done"
+
+$(TARGET):$(OBJ)
+	$(CC) $(CFLAGS) $< -o $@ $(LIB)
+
+%.o:%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf *.o main
+	rm -rf $(OBJ) $(TARGET)
+

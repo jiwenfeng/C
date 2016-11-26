@@ -1,13 +1,19 @@
-CFLAGS=-g -Wall -O2 -I. -I/usr/local/include/ -I/usr/include/
 CC=gcc
-LIBS=memory.o
+CFLAGS=-g -Wall
+SRC=$(wildcard *.c)
+OBJ=$(patsubst %.c, %.o, $(SRC))
+TARGET=$(subst .o, , $(OBJ))
+LIB=-lpthread
 
-main:$(LIBS)
-	$(CC) $(CFLAGS) $(LIBS) -o $@
+all:$(TARGET)
+	@echo "done"
 
-memory.o:memory.c memory.h
-	$(CC) -c -o $@ $< $(CFLAGS) 
+$(TARGET):$(OBJ)
+	$(CC) $(CFLAGS) $< -o $@ $(LIB)
+
+%.o:%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(LIBS) main core
+	rm -rf $(OBJ) $(TARGET)
 
