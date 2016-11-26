@@ -1,12 +1,2 @@
-*
 *.c.swp
-engineCode/
-!*.c
-!*.cpp
-!*.lua
-!*.h
-!Makefile
-!*.sh
-!*.md
-!config
-!*.s
+*.cpp.swp
