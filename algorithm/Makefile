@@ -2,14 +2,14 @@ CC=gcc
 CFLAGS=-g -Wall
 SRC=$(wildcard *.c)
 OBJ=$(patsubst %.c, %.o, $(SRC))
-TARGET=$(subst .o, , $(OBJ))
-LIB=-lpthread
+TARGET=$(patsubst %.o, %.out, $(OBJ))
+LIBS=-lpthread
 
 all:$(TARGET)
 	@echo "done"
 
-$(TARGET):$(OBJ)
-	$(CC) $(CFLAGS) $< -o $@ $(LIB)
+%.out:%.o
+	$(CC) $(CFLAGS) $^ -o $@ $(LIBS)
 
 %.o:%.c
 	$(CC) $(CFLAGS) -c $< -o $@

@@ -99,7 +99,7 @@ message_queue_debug(struct message_queue *mq)
 	struct message *msg = mq->head;
 	while(msg != NULL)
 	{
-		printf("%u:%d\n", msg->pid, msg->val);
+		printf("%u:%d\n", (unsigned int)msg->pid, msg->val);
 		msg = msg->next;
 	}
 }
